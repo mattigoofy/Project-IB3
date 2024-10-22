@@ -3,11 +3,114 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Project_IB3.MainPage">
 
+    <ContentPage.ToolbarItems>
+        <ToolbarItem x:Name="toInfoScreenButton"
+                    Text="To info screen"
+                    Priority="0"
+                    Order="Primary"
+                    Clicked="toInfoScreenButton_Clicked" /> 
+
+        <ToolbarItem Text="Log Out"
+                     Priority="1"
+                     Order="Primary"
+                     Clicked="OnLogoutClicked" />
+
+    </ContentPage.ToolbarItems>
+
     <ScrollView>
         <VerticalStackLayout
             Padding="30,0"
             Spacing="25">
-            <Image
+
+            <Label
+                Text="Move the robot"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1" />
+
+            <Grid
+                ColumnDefinitions="*,*,*"
+                RowDefinitions="*,*,*"
+                Padding="30">
+
+                <Button
+                    x:Name="moveForwardButton"
+                    Text="^"
+                    Clicked="moveForward"
+                    Grid.Row="1"
+                    Grid.Column="1"/>
+
+                <Button
+                    x:Name="moveLeftButton"
+                    Text="&lt;"
+                    Clicked="moveLeftButton_Clicked"
+                    Grid.Row="2"
+                    Grid.Column="0"/>
+
+                <Button
+                    x:Name="moveRightButton"
+                    Text="&gt;"
+                    Clicked="moveRightButton_Clicked"
+                    Grid.Row="2"
+                    Grid.Column="2"/>
+
+                <Button
+                    x:Name="moveBackwardsButton"
+                    Text="\/"
+                    Clicked="moveBackwards"
+                    Grid.Row="4"
+                    Grid.Column="1"/>
+
+            </Grid>
+
+            <!--<Grid
+                ColumnDefinitions="0.3*,0.3*,0.3*"
+                RowDefinitions="0.3*,0.3*,0.3*"
+                ColumnSpacing="20.0"
+                RowSpacing="10.0">
+
+                <Button
+                    x:Name="moveForwardButton"
+                    Text="^"
+                    Clicked="moveForward"
+                    AbsoluteLayout.LayoutBounds="0.5,0.5,0.3,0.3"
+                    BackgroundColor="LightBlue" 
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    HorizontalOptions="Center" />
+                
+                <Button
+                    x:Name="moveLeftButton"
+                    Text="&lt;"
+                    Clicked="moveLeftButton_Clicked"
+                    AbsoluteLayout.LayoutBounds="0.5,0.5,0.3,0.3"
+                    BackgroundColor="LightBlue" 
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    HorizontalOptions="End" />
+
+                <Button
+                    x:Name="moveRightButton"
+                    Text="&gt;"
+                    Clicked="moveRightButton_Clicked"
+                    AbsoluteLayout.LayoutBounds="0.5,0.5,0.3,0.3"
+                    BackgroundColor="LightBlue" 
+                    Grid.Row="2"
+                    Grid.Column="2"
+                    HorizontalOptions="Start" />
+
+                <Button
+                    x:Name="moveBackwardsButton"
+                    Text="\/"
+                    Clicked="moveBackwards"
+                    AbsoluteLayout.LayoutBounds="0.5,0.5,0.3,0.3"
+                    BackgroundColor="LightBlue" 
+                    Grid.Row="4"
+                    Grid.Column="1"
+                    HorizontalOptions="Center" />
+
+            </Grid>-->
+
+            <!-- <Image
                 Source="dotnet_bot.png"
                 HeightRequest="185"
                 Aspect="AspectFit"
@@ -30,6 +133,13 @@
                 SemanticProperties.Hint="Counts the number of times you click"
                 Clicked="OnCounterClicked"
                 HorizontalOptions="Fill" />
+
+            <Button
+                x:Name="ExtraBtn"
+                Text="Click me" 
+                SemanticProperties.Hint="Counts the number of times you click"
+                Clicked="OnCounterClicked"
+                HorizontalOptions="Fill" /> -->
         </VerticalStackLayout>
     </ScrollView>
 

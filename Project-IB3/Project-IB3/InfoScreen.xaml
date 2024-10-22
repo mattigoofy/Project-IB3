@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Project_IB3.InfoScreen"
+             Title="InfoScreen">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Log Out"
+                     Priority="0"
+                     Order="Primary"
+                     Clicked="OnLogoutClicked" />
+    </ContentPage.ToolbarItems>
+
+    <VerticalStackLayout Padding="20">
+        <Label
+                Text="What does the robot see"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1" />
+
+        <Grid ColumnDefinitions="Auto,Auto" HorizontalOptions="Center" Margin="0,10,0,0">
+            <Label Text="Watching Live:" 
+                   VerticalOptions="Center"
+                   HorizontalOptions="Start" 
+                   FontSize="18"/>
+            <Switch x:Name="liveSwitch"
+                    Grid.Column="1"
+                    HorizontalOptions="End"
+                    Toggled="OnLiveSwitchToggled" />
+            </Grid>
+
+            <!-- Grid for Column Headers -->
+        <Grid              
+            Padding="10"
+            HorizontalOptions="Center"
+            VerticalOptions="Center"
+            ColumnDefinitions="50, *, *" 
+            RowDefinitions="Auto"
+            ColumnSpacing="20">
+            <!-- Header Row -->
+            <Label Text="Index" FontSize="18" FontAttributes="Bold" Grid.Column="0" />
+            <Label Text="Distance (m)" FontSize="18" FontAttributes="Bold" Grid.Column="1" />
+            <Label Text="Time (s)" FontSize="18" FontAttributes="Bold" Grid.Column="2" />
+        </Grid>
+
+        <!-- CollectionView for displaying the dynamic data -->
+        <CollectionView x:Name="dataCollectionView"
+                        ItemsSource="{Binding DataList}" 
+                        Margin="0,0,0,0"
+                        VerticalOptions="FillAndExpand">
+            <!-- Set a height to allow scrolling -->
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid 
+                        Padding="10"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"
+                        ColumnDefinitions="50, *, *" 
+                        RowDefinitions="Auto"
+                        ColumnSpacing="20">
+
+                        <!-- Index Column -->
+                        <Label Text="{Binding Index}"
+                               FontSize="18" 
+                               Grid.Column="0" />
+
+                        <!-- Distance Column -->
+                        <Label Text="{Binding Distance}"
+                               FontSize="18"
+                               Grid.Column="1"/>
+
+                        <!-- Time Column -->
+                        <Label Text="{Binding Time}"
+                               FontSize="18"
+                               Grid.Column="2" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </VerticalStackLayout>
+</ContentPage>
