@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="WagentjeApp.Views.LiveTrajectPage"
+             Title="Live Traject">
+
+    <StackLayout Padding="20">
+        <Label Text="Live Traject Besturing"
+               FontSize="24"
+               HorizontalOptions="Center" />
+
+        <Button Text="Vooruit" Clicked="OnForwardClicked"/>
+        <Button Text="Achteruit" Clicked="OnBackwardClicked"/>
+        <Button Text="Links" Clicked="OnLeftClicked"/>
+        <Button Text="Rechts" Clicked="OnRightClicked"/>
+    </StackLayout>
+</ContentPage>
