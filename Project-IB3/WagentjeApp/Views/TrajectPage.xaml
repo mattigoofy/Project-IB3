@@ -4,6 +4,9 @@
              Title="Trajectbeheer">
 
     <StackLayout Padding="10">
+        <Label Text="Trajectnaam" />
+        <Entry x:Name="TrajectNameEntry" Placeholder="Naam van het traject" />
+
         <Label Text="Voeg een commando toe:" />
         <Picker x:Name="CommandPicker">
             <Picker.ItemsSource>
@@ -17,13 +20,16 @@
         </Picker>
 
         <Entry x:Name="DurationEntry" Placeholder="Duur (seconden)" Keyboard="Numeric" />
-
         <Button Text="Voeg Commando Toe" Clicked="OnAddCommandButtonClicked" />
 
         <ListView x:Name="CommandsListView" />
 
-        <Button Text="Voer Traject Uit" Clicked="OnExecuteTrajectButtonClicked" />
+        <Button Text="Opslaan Traject" Clicked="OnSaveTrajectButtonClicked" />
+        <Button Text="Verwijder Geselecteerd Traject" Clicked="OnDeleteTrajectButtonClicked" />
 
-        <Button Text="Verwijder Geselecteerd Commando" Clicked="OnDeleteCommandButtonClicked" />
+        <Label Text="Opgeslagen Trajecten:" />
+        <ListView x:Name="SavedTrajectsListView" SelectionMode="Single" />
+
+        <Button Text="Voer Geselecteerd Traject Uit" Clicked="OnExecuteTrajectButtonClicked" />
     </StackLayout>
 </ContentPage>

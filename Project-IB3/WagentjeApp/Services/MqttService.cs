@@ -3,6 +3,7 @@ using MQTTnet.Client;
 using MQTTnet.Client.Options;
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using System.Text;
 using WagentjeApp.Models; // Zorg ervoor dat je het juiste namespace toevoegt voor TrajectCommand
 using System.Text.RegularExpressions;
@@ -29,6 +30,8 @@ namespace WagentjeApp.Services
         private IMqttClientOptions _options;
         private TaskCompletionSource<bool> _loginCompletionSource;
         private TaskCompletionSource<bool> _registerCompletionSource;
+        private TaskCompletionSource<List<Traject>> _loadTrajectsCompletionSource;
+        private TaskCompletionSource<bool> _executeTrajectCompletionSource;
 
         // Private constructor to prevent instantiation
         private MqttService()
@@ -48,9 +51,11 @@ namespace WagentjeApp.Services
             if (!_client.IsConnected)
             {
                 await _client.ConnectAsync(_options);
-                // Abonneer op het juiste topic voor login en register responses
+                // Abonneer op het juiste topic voor login, register, en traject responses
                 await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/login/response").Build());
                 await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/register/response").Build());
+                await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/load_trajects/response").Build());
+                await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/execute_traject/response").Build());
             }
         }
 
@@ -93,6 +98,90 @@ namespace WagentjeApp.Services
             await PublishMessageAsync(topic, payload);
         }
 
+        // Method for loading saved trajectories
+        public async Task<List<Traject>> LoadTrajectsAsync(int userId)
+        {
+            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new
+            {
+                UserId = userId
+            });
+
+            _loadTrajectsCompletionSource = new TaskCompletionSource<List<Traject>>();
+
+            await ConnectAsync();
+            await PublishMessageAsync("raspberrypi/load_trajects", payload);
+
+            var trajectsList = await Task.WhenAny(_loadTrajectsCompletionSource.Task, Task.Delay(10000)) == _loadTrajectsCompletionSource.Task
+                ? _loadTrajectsCompletionSource.Task.Result
+                : new List<Traject>();
+
+            await DisconnectAsync();
+
+            return trajectsList;
+        }
+
+        // Method to save a new trajectory
+        public async Task SaveTrajectAsync(Traject traject, int userId)
+        {
+            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new
+            {
+                UserId = userId,
+                Traject = traject
+            });
+
+            await ConnectAsync();
+
+            try
+            {
+                await PublishMessageAsync("raspberrypi/save_traject", payload);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Publicatie mislukt: {ex.Message}");
+            }
+            finally
+            {
+                await DisconnectAsync();
+            }
+        }
+
+
+        // Method to delete a trajectory
+        public async Task DeleteTrajectAsync(int trajectId, int userId)
+        {
+            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new
+            {
+                TrajectId = trajectId,
+                UserId = userId
+            });
+
+            await ConnectAsync();
+            await PublishMessageAsync("raspberrypi/delete_traject", payload);
+            await DisconnectAsync();
+        }
+
+        // Method to execute a trajectory
+        public async Task<bool> ExecuteTrajectAsync(int trajectId, int userId)
+        {
+            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new
+            {
+                TrajectId = trajectId,
+                UserId = userId
+            });
+
+            _executeTrajectCompletionSource = new TaskCompletionSource<bool>();
+
+            await ConnectAsync();
+            await PublishMessageAsync("raspberrypi/execute_traject", payload);
+
+            var isSuccess = await Task.WhenAny(_executeTrajectCompletionSource.Task, Task.Delay(10000)) == _executeTrajectCompletionSource.Task
+                ? _executeTrajectCompletionSource.Task.Result
+                : false;
+
+            await DisconnectAsync();
+            return isSuccess;
+        }
+
         // Method for user login
         public async Task<bool> LoginAsync(string username, string password)
         {
@@ -102,35 +191,27 @@ namespace WagentjeApp.Services
                 Password = password
             });
 
-            // Maak een TaskCompletionSource om op een response te wachten
             _loginCompletionSource = new TaskCompletionSource<bool>();
-
-            // Verbind met de broker
             await ConnectAsync();
-
-            // Publiceer de login gegevens naar de MQTT-broker
             await PublishMessageAsync("raspberrypi/login", payload);
 
-            // Wacht op de response met een timeout van 10 seconden
             var isLoginSuccessful = await Task.WhenAny(_loginCompletionSource.Task, Task.Delay(10000)) == _loginCompletionSource.Task
                                     ? _loginCompletionSource.Task.Result
                                     : false;
             await DisconnectAsync();
-
             return isLoginSuccessful;
         }
 
         // Method for user registration
         public async Task<bool> RegisterAsync(string username, string password, string confirmPassword, string email)
         {
-            // Controleer of het wachtwoord en bevestigingswachtwoord overeenkomen
+            // Validate passwords and email
             if (password != confirmPassword)
             {
                 Console.WriteLine("Wachtwoorden komen niet overeen.");
                 return false;
             }
 
-            // Controleer of het emailadres geldig is
             if (!IsValidEmail(email))
             {
                 Console.WriteLine("Ongeldig emailadres.");
@@ -141,25 +222,18 @@ namespace WagentjeApp.Services
             {
                 Username = username,
                 Password = password,
-                ConfirmPassword = confirmPassword,  // Bevestiging van wachtwoord
-                Email = email  // Email veld
+                Email = email
             });
 
-            // Maak een TaskCompletionSource om op een response te wachten
             _registerCompletionSource = new TaskCompletionSource<bool>();
-
-            // Verbind met de broker
             await ConnectAsync();
-
-            // Publiceer de registratiegegevens naar de MQTT-broker
             await PublishMessageAsync("raspberrypi/register", payload);
 
-            // Wacht op de response van de server met een timeout van 10 seconden
             var isRegistrationSuccessful = await Task.WhenAny(_registerCompletionSource.Task, Task.Delay(10000)) == _registerCompletionSource.Task
-                                    ? _registerCompletionSource.Task.Result
-                                    : false;
-            await DisconnectAsync();
+                ? _registerCompletionSource.Task.Result
+                : false;
 
+            await DisconnectAsync();
             return isRegistrationSuccessful;
         }
 
@@ -171,36 +245,30 @@ namespace WagentjeApp.Services
 
             if (topic == "raspberrypi/login/response")
             {
-                // Verwacht een true of false uit de payload
                 bool isSuccess = message.Equals("true", StringComparison.OrdinalIgnoreCase);
-                Console.WriteLine($"isSuccess: {isSuccess}");
                 _loginCompletionSource?.SetResult(isSuccess);
             }
 
             if (topic == "raspberrypi/register/response")
             {
-                // Verwerk response voor registratie
-                Console.WriteLine($"Registratie response: {message}");
                 bool isSuccess = message.Equals("Registration successful", StringComparison.OrdinalIgnoreCase);
-
-                if (message.Equals("Username already exists", StringComparison.OrdinalIgnoreCase))
-                {
-                    Console.WriteLine("Gebruikersnaam bestaat al.");
-                }
-                else if (message.Equals("Passwords do not match", StringComparison.OrdinalIgnoreCase))
-                {
-                    Console.WriteLine("Wachtwoorden komen niet overeen.");
-                }
-                else if (message.Equals("Invalid email address", StringComparison.OrdinalIgnoreCase))
-                {
-                    Console.WriteLine("Ongeldig emailadres.");
-                }
-
                 _registerCompletionSource?.SetResult(isSuccess);
+            }
+
+            if (topic == "raspberrypi/load_trajects/response")
+            {
+                var trajects = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Traject>>(message);
+                _loadTrajectsCompletionSource?.SetResult(trajects);
+            }
+
+            if (topic == "raspberrypi/execute_traject/response")
+            {
+                bool isSuccess = message.Equals("true", StringComparison.OrdinalIgnoreCase);
+                _executeTrajectCompletionSource?.SetResult(isSuccess);
             }
         }
 
-        // Valideer e-mailadres met behulp van een regex
+        // Validate email format
         private bool IsValidEmail(string email)
         {
             try
@@ -217,7 +285,6 @@ namespace WagentjeApp.Services
         // Example method to get the latest measurement
         public async Task<Measurement> GetLatestMeasurementAsync()
         {
-            // Dummy return for demonstration
             return await Task.FromResult(new Measurement { Value = 42 });
         }
     }
@@ -226,5 +293,13 @@ namespace WagentjeApp.Services
     public class Measurement
     {
         public int Value { get; set; }
+    }
+
+    // Dummy Traject class
+    public class Traject
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public List<TrajectCommand> Commands { get; set; }
     }
 }

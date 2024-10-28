@@ -2,35 +2,49 @@ using Microsoft.Maui.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using WagentjeApp.Models; // Zorg ervoor dat je dit toevoegt voor de TrajectCommand class
-using WagentjeApp.Services;
+using WagentjeApp.Models;  // Voor Model-gerelateerde klassen zoals TrajectCommand en Traject
+using WagentjeApp.Services;  // Voor Service-gerelateerde klassen zoals MqttService
 
 namespace WagentjeApp.Views
 {
     public partial class TrajectPage : ContentPage
     {
-        private List<string> _commands; // Lijst om de commando's op te slaan
+        private List<string> _commands; // Lijst om commando's op te slaan
+        private List<Traject> _savedTrajects; // Gebruik Models.Traject om op te slaan in de UI
 
         public TrajectPage()
         {
             InitializeComponent();
-            _commands = new List<string>(); // Initialiseer de lijst
-            CommandsListView.ItemsSource = _commands; // Koppel de lijst aan de ListView
+            _commands = new List<string>(); // Initialiseer commandolijst
+            _savedTrajects = new List<Traject>(); // Initialiseer opgeslagen trajectenlijst
+            CommandsListView.ItemsSource = _commands;
+            LoadSavedTrajects();
+        }
+
+        private async void LoadSavedTrajects()
+        {
+            int userId = 1; // Placeholder, dynamisch userId ophalen
+            var savedTrajectsFromService = await MqttService.Instance.LoadTrajectsAsync(userId);
+
+            _savedTrajects = savedTrajectsFromService.Select(t => new Traject
+            {
+                Id = t.Id,
+                Name = t.Name,
+                Commands = t.Commands.Select(c => new TrajectCommand(c.Name, c.Duration, c.Action)).ToList()
+            }).ToList();
+
+            SavedTrajectsListView.ItemsSource = _savedTrajects.Select(t => t.Name);
         }
 
         private void OnAddCommandButtonClicked(object sender, EventArgs e)
         {
-            // Haal de geselecteerde waarde uit de Picker
             string selectedCommand = CommandPicker.SelectedItem as string;
-
-            // Haal de duur op en valideer deze
             if (int.TryParse(DurationEntry.Text, out int duration) && !string.IsNullOrEmpty(selectedCommand))
             {
-                // Voeg het commando toe aan de lijst
                 _commands.Add($"{selectedCommand} - {duration} seconden");
-                CommandsListView.ItemsSource = null; // Reset de binding
-                CommandsListView.ItemsSource = _commands; // Update de ListView
-                DurationEntry.Text = string.Empty; // Leeg het invoerveld
+                CommandsListView.ItemsSource = null;
+                CommandsListView.ItemsSource = _commands;
+                DurationEntry.Text = string.Empty; // Wis invoer
             }
             else
             {
@@ -38,64 +52,86 @@ namespace WagentjeApp.Views
             }
         }
 
-        private async void OnExecuteTrajectButtonClicked(object sender, EventArgs e)
+        private async void OnSaveTrajectButtonClicked(object sender, EventArgs e)
         {
+            string trajectName = TrajectNameEntry.Text;
+            if (string.IsNullOrEmpty(trajectName))
+            {
+                await DisplayAlert("Fout", "Geef een naam op voor het traject.", "OK");
+                return;
+            }
+
             if (_commands.Count > 0)
             {
-                // Maak een lijst met TrajectCommand objecten
                 var commands = _commands.Select(command =>
                 {
                     var parts = command.Split(" - ");
-
-                    // Controleer of er voldoende onderdelen zijn en of de actie en duur geldig zijn
                     if (parts.Length == 2 && int.TryParse(parts[1].Replace(" seconden", ""), out int duration))
                     {
-                        string actionName = parts[0]; // Haal de naam van het commando op (bijv. "Vooruit")
-                        return new TrajectCommand(actionName, duration, actionName); // Geef ook de Name mee
+                        string actionName = parts[0];
+                        return new TrajectCommand(actionName, duration, actionName);
                     }
-                    else
-                    {
-                        // Foutmelding in geval van een probleem
-                        DisplayAlert("Error", $"Ongeldig commando: {command}. Zorg ervoor dat het goed is geformatteerd.", "OK");
-                        return null; // Teruggeven als er een probleem is
-                    }
-                }).Where(c => c != null).ToArray(); // Filter eventuele null-waarden uit
+                    return null;
+                }).Where(c => c != null).ToArray();
 
                 if (commands.Length > 0)
                 {
-                    int userId = 1; // Stel een gebruikers-ID in (kan dynamisch worden aangepast)
+                    int userId = 1; // Placeholder, dynamisch userId ophalen
+                    var traject = new Traject
+                    {
+                        Name = trajectName,
+                        Commands = commands.ToList()
+                    };
 
-                    // Stuur de traject commando's naar de Raspberry Pi via de MQTT service
-                    await MqttService.Instance.SendTrajectAsync(commands, userId);
-                    await DisplayAlert("Succes", "Traject uitgevoerd en naar Raspberry Pi verzonden!", "OK");
+                    // Traject mappen voor MqttService (maak Services.Traject niet opnieuw aan, gebruik Models.TrajectCommand)
+                    var trajectForService = new WagentjeApp.Services.Traject
+                    {
+                        Id = traject.Id,
+                        Name = traject.Name,
+                        Commands = traject.Commands.Select(c => new WagentjeApp.Models.TrajectCommand(c.Name, c.Duration, c.Action)).ToList()
+                    };
+
+                    await MqttService.Instance.SaveTrajectAsync(trajectForService, userId);
+                    await DisplayAlert("Succes", "Traject opgeslagen!", "OK");
+                    _commands.Clear();
+                    CommandsListView.ItemsSource = null;
+
+                    LoadSavedTrajects();
                 }
-                else
-                {
-                    await DisplayAlert("Fout", "Geen geldige commando's om uit te voeren.", "OK");
-                }
-            }
-            else
-            {
-                await DisplayAlert("Fout", "Geen commando's om uit te voeren.", "OK");
             }
         }
 
-
-        // Methode om een commando uit de lijst te verwijderen
-        private void OnDeleteCommandButtonClicked(object sender, EventArgs e)
+        private async void OnDeleteTrajectButtonClicked(object sender, EventArgs e)
         {
-            if (CommandsListView.SelectedItem != null)
+            if (SavedTrajectsListView.SelectedItem != null)
             {
-                string selectedCommand = CommandsListView.SelectedItem as string;
-                _commands.Remove(selectedCommand);
+                string selectedTrajectName = SavedTrajectsListView.SelectedItem as string;
+                var traject = _savedTrajects.FirstOrDefault(t => t.Name == selectedTrajectName);
 
-                // Update de ListView
-                CommandsListView.ItemsSource = null;
-                CommandsListView.ItemsSource = _commands;
+                if (traject != null)
+                {
+                    int userId = 1; // Placeholder, dynamisch userId ophalen
+                    await MqttService.Instance.DeleteTrajectAsync(traject.Id, userId);
+                    await DisplayAlert("Succes", "Traject verwijderd!", "OK");
+
+                    LoadSavedTrajects();
+                }
             }
-            else
+        }
+
+        private async void OnExecuteTrajectButtonClicked(object sender, EventArgs e)
+        {
+            if (SavedTrajectsListView.SelectedItem != null)
             {
-                DisplayAlert("Error", "Selecteer een commando om te verwijderen.", "OK");
+                string selectedTrajectName = SavedTrajectsListView.SelectedItem as string;
+                var traject = _savedTrajects.FirstOrDefault(t => t.Name == selectedTrajectName);
+
+                if (traject != null)
+                {
+                    int userId = 1; // Placeholder, dynamisch userId ophalen
+                    await MqttService.Instance.ExecuteTrajectAsync(traject.Id, userId);
+                    await DisplayAlert("Succes", "Traject uitgevoerd!", "OK");
+                }
             }
         }
     }
