@@ -83,15 +83,7 @@ namespace WagentjeApp.Views
                         Commands = commands.ToList()
                     };
 
-                    // Traject mappen voor MqttService (maak Services.Traject niet opnieuw aan, gebruik Models.TrajectCommand)
-                    var trajectForService = new WagentjeApp.Services.Traject
-                    {
-                        Id = traject.Id,
-                        Name = traject.Name,
-                        Commands = traject.Commands.Select(c => new WagentjeApp.Models.TrajectCommand(c.Name, c.Duration, c.Action)).ToList()
-                    };
-
-                    await MqttService.Instance.SaveTrajectAsync(trajectForService, userId);
+                    await MqttService.Instance.SaveTrajectAsync(traject, userId);
                     await DisplayAlert("Succes", "Traject opgeslagen!", "OK");
                     _commands.Clear();
                     CommandsListView.ItemsSource = null;

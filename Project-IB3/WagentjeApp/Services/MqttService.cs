@@ -5,14 +5,14 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Text;
-using WagentjeApp.Models; // Zorg ervoor dat je het juiste namespace toevoegt voor TrajectCommand
+using WagentjeApp.Models;  // Gebruik enkel de Models namespace voor Traject en TrajectCommand
 using System.Text.RegularExpressions;
 
 namespace WagentjeApp.Services
 {
     public class MqttService
     {
-        // Singleton Instance
+        // Singleton instance
         private static MqttService _instance;
         public static MqttService Instance
         {
@@ -51,7 +51,6 @@ namespace WagentjeApp.Services
             if (!_client.IsConnected)
             {
                 await _client.ConnectAsync(_options);
-                // Abonneer op het juiste topic voor login, register, en traject responses
                 await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/login/response").Build());
                 await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/register/response").Build());
                 await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/load_trajects/response").Build());
@@ -84,28 +83,20 @@ namespace WagentjeApp.Services
         // Method to send TrajectCommand
         public async Task SendTrajectAsync(TrajectCommand[] commands, int userId)
         {
-            // Serialize commands to JSON
             string payload = Newtonsoft.Json.JsonConvert.SerializeObject(new
             {
                 UserId = userId,
                 Commands = commands
             });
 
-            // Topic for sending commands
-            string topic = $"raspberrypi/execute_traject";
-
-            // Publish the commands to the MQTT broker
+            string topic = "raspberrypi/execute_traject";
             await PublishMessageAsync(topic, payload);
         }
 
         // Method for loading saved trajectories
         public async Task<List<Traject>> LoadTrajectsAsync(int userId)
         {
-            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new
-            {
-                UserId = userId
-            });
-
+            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new { UserId = userId });
             _loadTrajectsCompletionSource = new TaskCompletionSource<List<Traject>>();
 
             await ConnectAsync();
@@ -116,19 +107,13 @@ namespace WagentjeApp.Services
                 : new List<Traject>();
 
             await DisconnectAsync();
-
             return trajectsList;
         }
 
         // Method to save a new trajectory
         public async Task SaveTrajectAsync(Traject traject, int userId)
         {
-            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new
-            {
-                UserId = userId,
-                Traject = traject
-            });
-
+            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new { UserId = userId, Traject = traject });
             await ConnectAsync();
 
             try
@@ -145,16 +130,10 @@ namespace WagentjeApp.Services
             }
         }
 
-
         // Method to delete a trajectory
         public async Task DeleteTrajectAsync(int trajectId, int userId)
         {
-            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new
-            {
-                TrajectId = trajectId,
-                UserId = userId
-            });
-
+            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new { TrajectId = trajectId, UserId = userId });
             await ConnectAsync();
             await PublishMessageAsync("raspberrypi/delete_traject", payload);
             await DisconnectAsync();
@@ -163,12 +142,7 @@ namespace WagentjeApp.Services
         // Method to execute a trajectory
         public async Task<bool> ExecuteTrajectAsync(int trajectId, int userId)
         {
-            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new
-            {
-                TrajectId = trajectId,
-                UserId = userId
-            });
-
+            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new { TrajectId = trajectId, UserId = userId });
             _executeTrajectCompletionSource = new TaskCompletionSource<bool>();
 
             await ConnectAsync();
@@ -248,19 +222,16 @@ namespace WagentjeApp.Services
                 bool isSuccess = message.Equals("true", StringComparison.OrdinalIgnoreCase);
                 _loginCompletionSource?.SetResult(isSuccess);
             }
-
             if (topic == "raspberrypi/register/response")
             {
                 bool isSuccess = message.Equals("Registration successful", StringComparison.OrdinalIgnoreCase);
                 _registerCompletionSource?.SetResult(isSuccess);
             }
-
             if (topic == "raspberrypi/load_trajects/response")
             {
                 var trajects = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Traject>>(message);
                 _loadTrajectsCompletionSource?.SetResult(trajects);
             }
-
             if (topic == "raspberrypi/execute_traject/response")
             {
                 bool isSuccess = message.Equals("true", StringComparison.OrdinalIgnoreCase);
@@ -281,7 +252,6 @@ namespace WagentjeApp.Services
                 return false;
             }
         }
-
         // Example method to get the latest measurement
         public async Task<Measurement> GetLatestMeasurementAsync()
         {
@@ -289,17 +259,10 @@ namespace WagentjeApp.Services
         }
     }
 
+
     // Dummy Measurement class (replace with actual implementation)
     public class Measurement
-    {
-        public int Value { get; set; }
-    }
-
-    // Dummy Traject class
-    public class Traject
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public List<TrajectCommand> Commands { get; set; }
-    }
+        {
+            public int Value { get; set; }
+        }
 }
