@@ -23,7 +23,8 @@ namespace WagentjeApp.Views
 
         private async void LoadSavedTrajects()
         {
-            int userId = 1; // Placeholder, dynamisch userId ophalen
+            var currentUser = MqttService.Instance.GetCurrentUser();
+            int userId = currentUser.UserId;
             var savedTrajectsFromService = await MqttService.Instance.LoadTrajectsAsync(userId);
 
             _savedTrajects = savedTrajectsFromService.Select(t => new Traject

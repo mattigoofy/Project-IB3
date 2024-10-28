@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Text;
 using WagentjeApp.Models;  // Gebruik enkel de Models namespace voor Traject en TrajectCommand
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 
 namespace WagentjeApp.Services
 {
@@ -41,8 +42,8 @@ namespace WagentjeApp.Services
             _client = factory.CreateMqttClient();
             _options = new MqttClientOptionsBuilder()
                 .WithClientId("WagentjeAppClient")
-                //.WithTcpServer("192.168.0.143", 1883) //thuis
-                .WithTcpServer("172.18.230.3", 1883) // lokaal 2.080
+                .WithTcpServer("192.168.0.143", 1883) //thuis
+                //.WithTcpServer("172.18.230.3", 1883) // lokaal 2.080
                 .Build();
             _client.UseApplicationMessageReceivedHandler(OnMessageReceived);
         }
@@ -173,12 +174,6 @@ namespace WagentjeApp.Services
             var isLoginSuccessful = await Task.WhenAny(_loginCompletionSource.Task, Task.Delay(10000)) == _loginCompletionSource.Task
                                     ? _loginCompletionSource.Task.Result
                                     : false;
-            if (isLoginSuccessful)
-            {
-                // Sla de ingelogde gebruiker op
-                _currentUser = new User { Username = username, UserId = /* vul de gebruikers-ID in, indien beschikbaar */ 1 };
-            }
-
             await DisconnectAsync();
             return isLoginSuccessful;
         }
@@ -186,6 +181,13 @@ namespace WagentjeApp.Services
         public User GetCurrentUser()
         {
             return _currentUser;
+        }
+
+        public async Task LogoutAsync()
+        {
+            // Verbreek de verbinding
+            await DisconnectAsync();
+            Console.WriteLine("Gebruiker is uitgelogd en MQTT-verbinding is verbroken.");
         }
 
         // Method for user registration
@@ -231,7 +233,17 @@ namespace WagentjeApp.Services
 
             if (topic == "raspberrypi/login/response")
             {
-                bool isSuccess = message.Equals("true", StringComparison.OrdinalIgnoreCase);
+                var loginResponse = JsonConvert.DeserializeObject<dynamic>(message);
+                bool isSuccess = loginResponse.userId != null;
+                if (isSuccess)
+                {
+                    int userId = loginResponse.userId;
+                    _currentUser = new User
+                    {
+                        Username = loginResponse.username, 
+                        UserId = userId
+                    };
+                }
                 _loginCompletionSource?.SetResult(isSuccess);
             }
             if (topic == "raspberrypi/register/response")
