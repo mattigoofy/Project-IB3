@@ -1,14 +1,19 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="WagentjeApp.Views.TrajectPage"
-             Title="Trajectbeheer">
+             Title="Trajectbeheer"
+             BackgroundColor="#121212">
+    <!-- Dark background color -->
 
     <StackLayout Padding="10">
-        <Label Text="Trajectnaam" />
-        <Entry x:Name="TrajectNameEntry" Placeholder="Naam van het traject" />
+        <Label Text="Trajectnaam" TextColor="#FFFFFF" />
+        <!-- White text color -->
+        <Entry x:Name="TrajectNameEntry" Placeholder="Naam van het traject" 
+               TextColor="#FFFFFF" PlaceholderColor="#A0A0A0" />
 
-        <Label Text="Voeg een commando toe:" />
-        <Picker x:Name="CommandPicker">
+        <Label Text="Voeg een commando toe:" TextColor="#FFFFFF" />
+        <Picker x:Name="CommandPicker" Title="Selecteer een commando" 
+                TextColor="#FFFFFF">
             <Picker.ItemsSource>
                 <x:Array Type="{x:Type x:String}">
                     <x:String>Vooruit</x:String>
@@ -19,17 +24,27 @@
             </Picker.ItemsSource>
         </Picker>
 
-        <Entry x:Name="DurationEntry" Placeholder="Duur (seconden)" Keyboard="Numeric" />
-        <Button Text="Voeg Commando Toe" Clicked="OnAddCommandButtonClicked" />
+        <Label Text="Duur (seconden)" TextColor="#FFFFFF" />
+        <Entry x:Name="DurationEntry" Placeholder="Duur (seconden)" 
+               Keyboard="Numeric" TextColor="#FFFFFF" PlaceholderColor="#A0A0A0" />
 
+        <Button Text="Voeg Commando Toe" Clicked="OnAddCommandButtonClicked" 
+                BackgroundColor="#1E1E1E" TextColor="#FFFFFF" />
+        <!-- Darker button -->
+
+        <Label Text="Huidige Commando's:" TextColor="#FFFFFF" />
         <ListView x:Name="CommandsListView" />
 
-        <Button Text="Opslaan Traject" Clicked="OnSaveTrajectButtonClicked" />
-        <Button Text="Verwijder Geselecteerd Traject" Clicked="OnDeleteTrajectButtonClicked" />
+        <Button Text="Opslaan Traject" Clicked="OnSaveTrajectButtonClicked" 
+                BackgroundColor="#1E1E1E" TextColor="#FFFFFF" />
+        <Button Text="Verwijder Geselecteerd Traject" Clicked="OnDeleteTrajectButtonClicked" 
+                BackgroundColor="#FF3B30" TextColor="#FFFFFF" />
+        <!-- Red button -->
 
-        <Label Text="Opgeslagen Trajecten:" />
+        <Label Text="Opgeslagen Trajecten:" TextColor="#FFFFFF" />
         <ListView x:Name="SavedTrajectsListView" SelectionMode="Single" />
 
-        <Button Text="Voer Geselecteerd Traject Uit" Clicked="OnExecuteTrajectButtonClicked" />
+        <Button Text="Voer Geselecteerd Traject Uit" Clicked="OnExecuteTrajectButtonClicked" 
+                BackgroundColor="#1E1E1E" TextColor="#FFFFFF" />
     </StackLayout>
 </ContentPage>

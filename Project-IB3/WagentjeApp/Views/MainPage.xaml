@@ -2,22 +2,51 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="WagentjeApp.Views.MainPage"
-             Title="Wagentje App">
+             Title="Wagentje App"
+             BackgroundColor="#F5F5F5">
+    <!-- Lichtgrijze achtergrond -->
 
-    <StackLayout Padding="20">
+    <StackLayout Padding="20"
+                 VerticalOptions="Center"
+                 HorizontalOptions="Center">
+
         <Label Text="Welkom bij Wagentje App!"
                FontSize="24"
-               HorizontalOptions="Center" />
+               FontAttributes="Bold"
+               HorizontalOptions="Center"
+               TextColor="#333333" />
+        <!-- Donkergrijze kleur -->
 
-        <Button Text="Traject Aanmaken"
-                Clicked="OnCreateTrajectClicked" />
-        <Button Text="Live Traject Besturen"
-                Clicked="OnLiveTrajectClicked" />
-        <Button Text="Live Metingen Bekijken"
-                Clicked="OnLiveMetingenClicked" />
-        <Button Text="Manuele Metingen"
-                Clicked="OnManualMeasurementsClicked" />
-        <Button Text="Log uit"
-                Clicked="OnLogoutClicked" />
+        <StackLayout Spacing="15" VerticalOptions="Center">
+            <Button Text="Traject Aanmaken"
+                    Clicked="OnCreateTrajectClicked"
+                    BackgroundColor="#4CAF50"
+                    TextColor="White"
+                    CornerRadius="10" />
+
+            <Button Text="Live Traject Besturen"
+                    Clicked="OnLiveTrajectClicked"
+                    BackgroundColor="#2196F3"
+                    TextColor="White"
+                    CornerRadius="10" />
+
+            <Button Text="Live Metingen Bekijken"
+                    Clicked="OnLiveMetingenClicked"
+                    BackgroundColor="#FF9800"
+                    TextColor="White"
+                    CornerRadius="10" />
+
+            <Button Text="Manuele Metingen"
+                    Clicked="OnManualMeasurementsClicked"
+                    BackgroundColor="#FF5722"
+                    TextColor="White"
+                    CornerRadius="10" />
+
+            <Button Text="Log uit"
+                    Clicked="OnLogoutClicked"
+                    BackgroundColor="#F44336"
+                    TextColor="White"
+                    CornerRadius="10" />
+        </StackLayout>
     </StackLayout>
 </ContentPage>
