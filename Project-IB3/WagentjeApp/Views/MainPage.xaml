@@ -17,5 +17,7 @@
                 Clicked="OnLiveMetingenClicked" />
         <Button Text="Manuele Metingen"
                 Clicked="OnManualMeasurementsClicked" />
+        <Button Text="Log uit"
+                Clicked="OnLogoutClicked" />
     </StackLayout>
 </ContentPage>

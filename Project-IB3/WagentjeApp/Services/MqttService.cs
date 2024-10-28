@@ -32,6 +32,7 @@ namespace WagentjeApp.Services
         private TaskCompletionSource<bool> _registerCompletionSource;
         private TaskCompletionSource<List<Traject>> _loadTrajectsCompletionSource;
         private TaskCompletionSource<bool> _executeTrajectCompletionSource;
+        private User _currentUser; // Voor het opslaan van de huidige gebruiker
 
         // Private constructor to prevent instantiation
         private MqttService()
@@ -172,8 +173,19 @@ namespace WagentjeApp.Services
             var isLoginSuccessful = await Task.WhenAny(_loginCompletionSource.Task, Task.Delay(10000)) == _loginCompletionSource.Task
                                     ? _loginCompletionSource.Task.Result
                                     : false;
+            if (isLoginSuccessful)
+            {
+                // Sla de ingelogde gebruiker op
+                _currentUser = new User { Username = username, UserId = /* vul de gebruikers-ID in, indien beschikbaar */ 1 };
+            }
+
             await DisconnectAsync();
             return isLoginSuccessful;
+        }
+
+        public User GetCurrentUser()
+        {
+            return _currentUser;
         }
 
         // Method for user registration

@@ -76,7 +76,8 @@ namespace WagentjeApp.Views
 
                 if (commands.Length > 0)
                 {
-                    int userId = 1; // Placeholder, dynamisch userId ophalen
+                    var currentUser = MqttService.Instance.GetCurrentUser();
+                    int userId = currentUser.UserId;
                     var traject = new Traject
                     {
                         Name = trajectName,
@@ -102,7 +103,8 @@ namespace WagentjeApp.Views
 
                 if (traject != null)
                 {
-                    int userId = 1; // Placeholder, dynamisch userId ophalen
+                    var currentUser = MqttService.Instance.GetCurrentUser();
+                    int userId = currentUser.UserId;
                     await MqttService.Instance.DeleteTrajectAsync(traject.Id, userId);
                     await DisplayAlert("Succes", "Traject verwijderd!", "OK");
 
@@ -120,7 +122,8 @@ namespace WagentjeApp.Views
 
                 if (traject != null)
                 {
-                    int userId = 1; // Placeholder, dynamisch userId ophalen
+                    var currentUser = MqttService.Instance.GetCurrentUser();
+                    int userId = currentUser.UserId;
                     await MqttService.Instance.ExecuteTrajectAsync(traject.Id, userId);
                     await DisplayAlert("Succes", "Traject uitgevoerd!", "OK");
                 }
