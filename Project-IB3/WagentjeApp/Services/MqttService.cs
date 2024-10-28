@@ -34,20 +34,25 @@ namespace WagentjeApp.Services
         private TaskCompletionSource<List<Traject>> _loadTrajectsCompletionSource;
         private TaskCompletionSource<bool> _executeTrajectCompletionSource;
         private User _currentUser; // Voor het opslaan van de huidige gebruiker
+        private string _mqttServerIp = "192.168.0.143"; // Standaard IP-adres
+                                   //private string _mqttServerIp = "172.18.230.3"; // Standaard IP-adres
+
 
         // Private constructor to prevent instantiation
         private MqttService()
         {
             var factory = new MqttFactory();
             _client = factory.CreateMqttClient();
-            _options = new MqttClientOptionsBuilder()
-                .WithClientId("WagentjeAppClient")
-                .WithTcpServer("192.168.0.143", 1883) //thuis
-                //.WithTcpServer("172.18.230.3", 1883) // lokaal 2.080
-                .Build();
+            InitializeMqttOptions();
             _client.UseApplicationMessageReceivedHandler(OnMessageReceived);
         }
-
+        private void InitializeMqttOptions()
+        {
+            _options = new MqttClientOptionsBuilder()
+                .WithClientId("WagentjeAppClient")
+                .WithTcpServer(_mqttServerIp, 1883) // Gebruik het opgeslagen IP-adres
+                .Build();
+        }
         public async Task ConnectAsync()
         {
             if (!_client.IsConnected)
@@ -276,17 +281,33 @@ namespace WagentjeApp.Services
                 return false;
             }
         }
+
+        // Method to get the current IP address
+        public string GetIpAddress()
+        {
+            return _mqttServerIp;
+        }
+
+        // Method to set the new IP address
+        public void SetIpAddress(string ipAddress)
+        {
+            _mqttServerIp = ipAddress;
+            InitializeMqttOptions(); // Update the MQTT options with the new IP address
+        }
+
         // Example method to get the latest measurement
         public async Task<Measurement> GetLatestMeasurementAsync()
         {
             return await Task.FromResult(new Measurement { Value = 42 });
         }
-    }
 
-
-    // Dummy Measurement class (replace with actual implementation)
-    public class Measurement
+        // Dummy Measurement class (replace with actual implementation)
+        public class Measurement
         {
             public int Value { get; set; }
         }
+    }
+
+
+
 }

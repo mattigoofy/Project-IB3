@@ -39,5 +39,8 @@ namespace WagentjeApp.Views
             // Navigeer terug naar de LoginPage
             Application.Current.MainPage = new NavigationPage(new LoginPage());
         }
+       
+
     }
+
 }

@@ -8,6 +8,7 @@
         <Entry x:Name="PasswordEntry" Placeholder="Password" IsPassword="True" />
         <Button Text="Login" Clicked="OnLoginButtonClicked" />
         <Button Text="Registreren" Clicked="OnRegisterButtonClicked" />
+        <Button Text="Instellingen" Clicked="OnSettingsClicked"/>
     </StackLayout>
 
 </ContentPage>
