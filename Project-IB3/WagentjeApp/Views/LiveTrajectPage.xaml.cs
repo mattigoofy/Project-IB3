@@ -37,7 +37,7 @@ namespace WagentjeApp.Views
             var command = new TrajectCommand(commandName, duration, commandName);
 
             int userId = 1; // Hier moet je de juiste userId verkrijgen, dit kan uit een sessie of een andere bron komen
-            await MqttService.Instance.SendTrajectAsync(new[] { command }, userId);
+            await MqttService.Instance.ExecuteCommandAsync(new[] { command }, userId);
         }
     }
 }
