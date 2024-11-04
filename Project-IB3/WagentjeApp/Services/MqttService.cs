@@ -34,8 +34,8 @@ namespace WagentjeApp.Services
         private TaskCompletionSource<List<Traject>> _loadTrajectsCompletionSource;
         private TaskCompletionSource<bool> _executeTrajectCompletionSource;
         private User _currentUser; // Voor het opslaan van de huidige gebruiker
-        private string _mqttServerIp = "192.168.0.143"; // Standaard IP-adres
-                                   //private string _mqttServerIp = "172.18.230.3"; // Standaard IP-adres
+        //private string _mqttServerIp = "192.168.0.143"; // Standaard IP-adres
+        private string _mqttServerIp = "172.18.230.3"; // Standaard IP-adres
 
 
         // Private constructor to prevent instantiation

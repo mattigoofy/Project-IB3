@@ -4,14 +4,38 @@
              x:Class="WagentjeApp.Views.LiveTrajectPage"
              Title="Live Traject">
 
-    <StackLayout Padding="20">
+    <StackLayout Padding="20" HorizontalOptions="Center" VerticalOptions="Center">
         <Label Text="Live Traject Besturing"
                FontSize="24"
-               HorizontalOptions="Center" />
+               HorizontalOptions="Center"
+               Margin="0,0,0,20" />
 
-        <Button Text="Vooruit" Clicked="OnForwardClicked"/>
-        <Button Text="Achteruit" Clicked="OnBackwardClicked"/>
-        <Button Text="Links" Clicked="OnLeftClicked"/>
-        <Button Text="Rechts" Clicked="OnRightClicked"/>
+        <!-- Gebruik een grid layout voor een compacte weergave -->
+        <Grid RowDefinitions="Auto,Auto,Auto"
+              ColumnDefinitions="Auto,Auto,Auto"
+              HorizontalOptions="Center">
+
+            <!-- Leeg veld linksboven -->
+            <Label Grid.Row="0" Grid.Column="0" />
+
+            <!-- Vooruit knop met pijl omhoog -->
+            <Button Text="⬆" FontSize="32" Clicked="OnForwardClicked"
+                    Grid.Row="0" Grid.Column="1" />
+
+            <!-- Leeg veld rechtsboven -->
+            <Label Grid.Row="0" Grid.Column="2" />
+
+            <!-- Links knop met pijl naar links -->
+            <Button Text="⬅" FontSize="32" Clicked="OnLeftClicked"
+                    Grid.Row="1" Grid.Column="0" />
+
+            <!-- Achteruit knop met pijl omlaag -->
+            <Button Text="⬇" FontSize="32" Clicked="OnBackwardClicked"
+                    Grid.Row="3" Grid.Column="1" />
+
+            <!-- Rechts knop met pijl naar rechts -->
+            <Button Text="⮕" FontSize="32" Clicked="OnRightClicked"
+                    Grid.Row="1" Grid.Column="2" />
+        </Grid>
     </StackLayout>
 </ContentPage>

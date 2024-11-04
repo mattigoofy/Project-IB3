@@ -23,7 +23,7 @@ namespace WagentjeApp.Views
                 await MqttService.Instance.ConnectAsync();
 
                 // Probeer in te loggen
-                bool isLoggedIn = await MqttService.Instance.LoginAsync(username, password);
+                bool isLoggedIn = await MqttService.Instance.LoginAsync(username, password); 
 
                 if (isLoggedIn)
                 {

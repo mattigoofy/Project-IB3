@@ -2,13 +2,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="WagentjeApp.Views.LoginPage"
              Title="Login">
+    
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Instellingen"
+                     Priority="0"
+                     Order="Primary"
+                     Clicked="OnSettingsClicked" />
+
+    </ContentPage.ToolbarItems>
 
     <StackLayout Padding="10">
         <Entry x:Name="UsernameEntry" Placeholder="Username" />
         <Entry x:Name="PasswordEntry" Placeholder="Password" IsPassword="True" />
         <Button Text="Login" Clicked="OnLoginButtonClicked" />
         <Button Text="Registreren" Clicked="OnRegisterButtonClicked" />
-        <Button Text="Instellingen" Clicked="OnSettingsClicked"/>
     </StackLayout>
-
 </ContentPage>
