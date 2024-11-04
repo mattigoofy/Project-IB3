@@ -2,6 +2,7 @@ import paho.mqtt.client as mqtt
 import mysql.connector
 import json
 import re  # Voor e-mailvalidatie
+from testCrypt import *
 
 # MQTT-instellingen
 BROKER = "localhost"
@@ -68,6 +69,7 @@ def handle_register(payload):
         data = json.loads(payload)
         username = data.get("Username")
         password = data.get("Password")
+        password = decrypt(password)
         email = data.get("Email")
 
         if not is_valid_email(email):
@@ -90,11 +92,13 @@ def handle_register(payload):
             cursor.execute("INSERT INTO users (username, password, email) VALUES (%s, %s, %s)", (username, password, email))
             connection.commit()
             print("Registratie geslaagd!")
-            client.publish("raspberrypi/register/response", "Registration successful")
+            response_payload = encrypt("Registration successful")
+            client.publish("raspberrypi/register/response", response_payload)
             connection.close()
     except json.JSONDecodeError:
         print("Fout bij het parsen van registratie payload.")
-        client.publish("raspberrypi/register/response", "Invalid payload format")
+        response_payload = encrypt("Invalid payload format")
+        client.publish("raspberrypi/register/response", response_payload)
 
 # Verwerk login informatie
 def handle_login(payload):
@@ -102,6 +106,7 @@ def handle_login(payload):
         data = json.loads(payload)
         username = data.get("Username")
         password = data.get("Password")
+        password = decrypt(password)
 
         connection = connect_to_db()
         if connection:
@@ -116,14 +121,17 @@ def handle_login(payload):
                     response_payload = json.dumps({"success": True, "userId": user_id, "username": username})
                     client.publish("raspberrypi/login/response", response_payload)
                 else:
-                    client.publish("raspberrypi/login/response", json.dumps({"success": False, "error": "User ID not found"}))
+                    response_payload = encrypt(json.dumps({"success": False, "error": "User ID not found"}))
+                    client.publish("raspberrypi/login/response", response_payload)
             else:
                 print("Login mislukt!")
-                client.publish("raspberrypi/login/response", json.dumps({"success": False}))
+                response_payload = encrypt(json.dumps({"success": False}))
+                client.publish("raspberrypi/login/response", response_payload)
             connection.close()
     except json.JSONDecodeError:
         print("Fout bij het parsen van login payload.")
-        client.publish("raspberrypi/login/response", json.dumps({"success": False}))
+        response_payload = encrypt(json.dumps({"success": False}))
+        client.publish("raspberrypi/login/response", response_payload)
 
 
 # Verwerk opslaan van trajecten
