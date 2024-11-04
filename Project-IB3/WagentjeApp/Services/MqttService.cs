@@ -190,12 +190,12 @@ namespace WagentjeApp.Services
         }
 
         // Method to send TrajectCommand
-        public async Task ExecuteCommandAsync(TrajectCommand[] commands, int userId)
+        public async Task ExecuteCommandAsync(TrajectCommand command, int userId)
         {
             string payload = Newtonsoft.Json.JsonConvert.SerializeObject(new
             {
                 UserId = userId,
-                Commands = commands
+                Command = command
             });
 
             string topic = "raspberrypi/execute_command";
