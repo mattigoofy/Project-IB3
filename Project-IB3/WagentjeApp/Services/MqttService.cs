@@ -171,6 +171,7 @@ namespace WagentjeApp.Services
                 Username = username,
                 Password = password
             });
+            payload = AesEncryption.Encrypt(payload);
 
             _loginCompletionSource = new TaskCompletionSource<bool>();
             await ConnectAsync();
@@ -214,9 +215,10 @@ namespace WagentjeApp.Services
             var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new
             {
                 Username = username,
-                Password = password,
+                Password = AesEncryption.Encrypt(password),
                 Email = email
             });
+            payload = AesEncryption.Encrypt(payload);
 
             _registerCompletionSource = new TaskCompletionSource<bool>();
             await ConnectAsync();
@@ -238,6 +240,7 @@ namespace WagentjeApp.Services
 
             if (topic == "raspberrypi/login/response")
             {
+                message = AesEncryption.Decrypt(message);
                 var loginResponse = JsonConvert.DeserializeObject<dynamic>(message);
                 bool isSuccess = loginResponse.userId != null;
                 if (isSuccess)
@@ -253,6 +256,7 @@ namespace WagentjeApp.Services
             }
             if (topic == "raspberrypi/register/response")
             {
+                message = AesEncryption.Decrypt(message);
                 bool isSuccess = message.Equals("Registration successful", StringComparison.OrdinalIgnoreCase);
                 _registerCompletionSource?.SetResult(isSuccess);
             }

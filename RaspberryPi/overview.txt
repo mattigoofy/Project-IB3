@@ -1,0 +1,48 @@
+MAIN
+│
+├── client.on_connect -> on_connect
+│                          ├── client.subscribe("raspberrypi/login")
+│                          ├── client.subscribe("raspberrypi/register")
+│                          ├── client.subscribe("raspberrypi/execute_traject")
+│                          ├── client.subscribe("raspberrypi/delete_traject")
+│                          ├── client.subscribe("raspberrypi/load_trajects")
+│                          └── client.subscribe("raspberrypi/save_traject")
+│
+├── client.on_message -> on_message
+│                          ├── handle_login(payload)
+│                          ├── handle_register(payload)
+│                          ├── handle_execute_traject(payload)
+│                          ├── handle_delete_traject(payload)
+│                          ├── handle_load_trajects(payload)
+│                          └── handle_save_traject(payload)
+│
+├── connect_to_db
+│
+├── is_valid_email(email)
+│
+├── handle_register(payload)
+│                          ├── is_valid_email(email)
+│                          ├── connect_to_db()
+│                          └── client.publish("raspberrypi/register/response")
+│
+├── handle_login(payload)
+│                          ├── connect_to_db()
+│                          └── client.publish("raspberrypi/login/response")
+│
+├── handle_save_traject(payload)
+│                          ├── connect_to_db()
+│                          └── client.publish("raspberrypi/save_traject/response")
+│
+├── handle_execute_traject(payload)
+│                          └── client.publish("raspberrypi/execute_traject/response")
+│
+├── handle_delete_traject(payload)
+│                          ├── connect_to_db()
+│                          └── client.publish("raspberrypi/delete_traject/response")
+│
+├── e_handlload_trajects(payload)
+│                          ├── connect_to_db()
+│                          ├── datetime_converter
+│                          └── client.publish("raspberrypi/load_trajects/response")
+│
+└── datetime_converter(o)
