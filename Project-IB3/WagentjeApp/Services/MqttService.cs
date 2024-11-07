@@ -62,6 +62,7 @@ namespace WagentjeApp.Services
                 await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/register/response").Build());
                 await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/load_trajects/response").Build());
                 await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/execute_traject/response").Build());
+                await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/execute_command/response").Build());
             }
         }
 
@@ -87,17 +88,144 @@ namespace WagentjeApp.Services
             }
         }
 
+        // Callback voor ontvangen berichten
+        private void OnMessageReceived(MqttApplicationMessageReceivedEventArgs args)
+        {
+            var topic = args.ApplicationMessage.Topic;
+            var message = Encoding.UTF8.GetString(args.ApplicationMessage.Payload);
+
+            if (topic == "raspberrypi/login/response")
+            {
+                message = AesEncryption.Decrypt(message);
+                var loginResponse = JsonConvert.DeserializeObject<dynamic>(message);
+                bool isSuccess = loginResponse.userId != null;
+                if (isSuccess)
+                {
+                    int userId = loginResponse.userId;
+                    _currentUser = new User
+                    {
+                        Username = loginResponse.username,
+                        UserId = userId
+                    };
+                }
+                _loginCompletionSource?.SetResult(isSuccess);
+            }
+            if (topic == "raspberrypi/register/response")
+            {
+                message = AesEncryption.Decrypt(message);
+                bool isSuccess = message.Equals("Registration successful", StringComparison.OrdinalIgnoreCase);
+                _registerCompletionSource?.SetResult(isSuccess);
+            }
+            if (topic == "raspberrypi/load_trajects/response")
+            {
+                var trajects = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Traject>>(message);
+                _loadTrajectsCompletionSource?.SetResult(trajects);
+            }
+            if (topic == "raspberrypi/execute_traject/response")
+            {
+                bool isSuccess = message.Equals("true", StringComparison.OrdinalIgnoreCase);
+                _executeTrajectCompletionSource?.SetResult(isSuccess);
+            }
+        }
+
+
+
+
+
+        // Method for user login
+        public async Task<bool> LoginAsync(string username, string password)
+        {
+            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new
+            {
+                Username = username,
+                Password = password
+            });
+            payload = AesEncryption.Encrypt(payload);
+
+            _loginCompletionSource = new TaskCompletionSource<bool>();
+            await ConnectAsync();
+            await PublishMessageAsync("raspberrypi/login", payload);
+
+            var isLoginSuccessful = await Task.WhenAny(_loginCompletionSource.Task, Task.Delay(10000)) == _loginCompletionSource.Task
+                                    ? _loginCompletionSource.Task.Result
+                                    : false;
+            await DisconnectAsync();
+            return isLoginSuccessful;
+        }
+
+        // Method for user registration
+        public async Task<bool> RegisterAsync(string username, string password, string confirmPassword, string email)
+        {
+            // Validate passwords and email
+            if (password != confirmPassword)
+            {
+                Console.WriteLine("Wachtwoorden komen niet overeen.");
+                return false;
+            }
+
+            if (!IsValidEmail(email))
+            {
+                Console.WriteLine("Ongeldig emailadres.");
+                return false;
+            }
+
+            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new
+            {
+                Username = username,
+                Password = AesEncryption.Encrypt(password),
+                Email = email
+            });
+            payload = AesEncryption.Encrypt(payload);
+
+            _registerCompletionSource = new TaskCompletionSource<bool>();
+            await ConnectAsync();
+            await PublishMessageAsync("raspberrypi/register", payload);
+
+            var isRegistrationSuccessful = await Task.WhenAny(_registerCompletionSource.Task, Task.Delay(10000)) == _registerCompletionSource.Task
+                ? _registerCompletionSource.Task.Result
+                : false;
+
+            await DisconnectAsync();
+            return isRegistrationSuccessful;
+        }
+
         // Method to send TrajectCommand
-        public async Task SendTrajectAsync(TrajectCommand[] commands, int userId)
+        public async Task ExecuteCommandAsync(TrajectCommand command, int userId)
         {
             string payload = Newtonsoft.Json.JsonConvert.SerializeObject(new
             {
                 UserId = userId,
-                Commands = commands
+                Command = command
             });
 
-            string topic = "raspberrypi/execute_traject";
+            string topic = "raspberrypi/execute_command";
             await PublishMessageAsync(topic, payload);
+        }
+
+        // Method to execute a trajectory
+        public async Task<bool> ExecuteTrajectAsync(int trajectId, int userId)
+        {
+            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new { TrajectId = trajectId, UserId = userId });
+            _executeTrajectCompletionSource = new TaskCompletionSource<bool>();
+
+            await ConnectAsync();
+            await PublishMessageAsync("raspberrypi/execute_traject", payload);
+
+            var isSuccess = await Task.WhenAny(_executeTrajectCompletionSource.Task, Task.Delay(10000)) == _executeTrajectCompletionSource.Task
+                ? _executeTrajectCompletionSource.Task.Result
+                : false;
+
+            await DisconnectAsync();
+            return isSuccess;
+        }
+
+        // Method to delete a trajectory
+        public async Task DeleteTrajectAsync(int trajectId, int userId)
+        {
+            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new { TrajectId = trajectId, UserId = userId });
+            await ConnectAsync();
+            await PublishMessageAsync("raspberrypi/delete_traject", payload);
+            await DisconnectAsync();
         }
 
         // Method for loading saved trajectories
@@ -137,52 +265,8 @@ namespace WagentjeApp.Services
             }
         }
 
-        // Method to delete a trajectory
-        public async Task DeleteTrajectAsync(int trajectId, int userId)
-        {
-            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new { TrajectId = trajectId, UserId = userId });
-            await ConnectAsync();
-            await PublishMessageAsync("raspberrypi/delete_traject", payload);
-            await DisconnectAsync();
-        }
 
-        // Method to execute a trajectory
-        public async Task<bool> ExecuteTrajectAsync(int trajectId, int userId)
-        {
-            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new { TrajectId = trajectId, UserId = userId });
-            _executeTrajectCompletionSource = new TaskCompletionSource<bool>();
 
-            await ConnectAsync();
-            await PublishMessageAsync("raspberrypi/execute_traject", payload);
-
-            var isSuccess = await Task.WhenAny(_executeTrajectCompletionSource.Task, Task.Delay(10000)) == _executeTrajectCompletionSource.Task
-                ? _executeTrajectCompletionSource.Task.Result
-                : false;
-
-            await DisconnectAsync();
-            return isSuccess;
-        }
-
-        // Method for user login
-        public async Task<bool> LoginAsync(string username, string password)
-        {
-            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new
-            {
-                Username = username,
-                Password = password
-            });
-            payload = AesEncryption.Encrypt(payload);
-
-            _loginCompletionSource = new TaskCompletionSource<bool>();
-            await ConnectAsync();
-            await PublishMessageAsync("raspberrypi/login", payload);
-
-            var isLoginSuccessful = await Task.WhenAny(_loginCompletionSource.Task, Task.Delay(10000)) == _loginCompletionSource.Task
-                                    ? _loginCompletionSource.Task.Result
-                                    : false;
-            await DisconnectAsync();
-            return isLoginSuccessful;
-        }
 
         public User GetCurrentUser()
         {
@@ -194,82 +278,6 @@ namespace WagentjeApp.Services
             // Verbreek de verbinding
             await DisconnectAsync();
             Console.WriteLine("Gebruiker is uitgelogd en MQTT-verbinding is verbroken.");
-        }
-
-        // Method for user registration
-        public async Task<bool> RegisterAsync(string username, string password, string confirmPassword, string email)
-        {
-            // Validate passwords and email
-            if (password != confirmPassword)
-            {
-                Console.WriteLine("Wachtwoorden komen niet overeen.");
-                return false;
-            }
-
-            if (!IsValidEmail(email))
-            {
-                Console.WriteLine("Ongeldig emailadres.");
-                return false;
-            }
-
-            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new
-            {
-                Username = username,
-                Password = AesEncryption.Encrypt(password),
-                Email = email
-            });
-            payload = AesEncryption.Encrypt(payload);
-
-            _registerCompletionSource = new TaskCompletionSource<bool>();
-            await ConnectAsync();
-            await PublishMessageAsync("raspberrypi/register", payload);
-
-            var isRegistrationSuccessful = await Task.WhenAny(_registerCompletionSource.Task, Task.Delay(10000)) == _registerCompletionSource.Task
-                ? _registerCompletionSource.Task.Result
-                : false;
-
-            await DisconnectAsync();
-            return isRegistrationSuccessful;
-        }
-
-        // Callback voor ontvangen berichten
-        private void OnMessageReceived(MqttApplicationMessageReceivedEventArgs args)
-        {
-            var topic = args.ApplicationMessage.Topic;
-            var message = Encoding.UTF8.GetString(args.ApplicationMessage.Payload);
-
-            if (topic == "raspberrypi/login/response")
-            {
-                message = AesEncryption.Decrypt(message);
-                var loginResponse = JsonConvert.DeserializeObject<dynamic>(message);
-                bool isSuccess = loginResponse.userId != null;
-                if (isSuccess)
-                {
-                    int userId = loginResponse.userId;
-                    _currentUser = new User
-                    {
-                        Username = loginResponse.username, 
-                        UserId = userId
-                    };
-                }
-                _loginCompletionSource?.SetResult(isSuccess);
-            }
-            if (topic == "raspberrypi/register/response")
-            {
-                message = AesEncryption.Decrypt(message);
-                bool isSuccess = message.Equals("Registration successful", StringComparison.OrdinalIgnoreCase);
-                _registerCompletionSource?.SetResult(isSuccess);
-            }
-            if (topic == "raspberrypi/load_trajects/response")
-            {
-                var trajects = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Traject>>(message);
-                _loadTrajectsCompletionSource?.SetResult(trajects);
-            }
-            if (topic == "raspberrypi/execute_traject/response")
-            {
-                bool isSuccess = message.Equals("true", StringComparison.OrdinalIgnoreCase);
-                _executeTrajectCompletionSource?.SetResult(isSuccess);
-            }
         }
 
         // Validate email format

@@ -17,10 +17,10 @@ def decrypt(cipher_text):
     return unpad(decrypted, AES.block_size).decode()
 
 # Example Usage
-# if __name__ == "__main__":
-#     message = "Hello, World!"
-#     encrypted_message = encrypt(message)
-#     print("Encrypted:", encrypted_message)
-#     # decrypted_message = decrypt(encrypted_message)
-#     decrypted_message = decrypt(input("zeg ke"))
-#     print("Decrypted:", decrypted_message)
+if __name__ == "__main__":
+    message = "balshfglhsdfjlgjksldfhgjkdshgkjsdhfgjshdfjksdfghjklmlkjhgfdfghjklmlkjhgfdsdfghjklqsdfqsdqsdfqsdfqsdfqsdfqsdfqmqmlsdkhfjsgdqlfhjkqsdghflkjsqfdqfqsdfqsdfqsdfqdflhsdkjlfhgjkghklshll"
+    encrypted_message = encrypt(message)
+    print("Encrypted:", encrypted_message)
+    # decrypted_message = decrypt(encrypted_message)
+    decrypted_message = decrypt(input("zeg ke"))
+    print("Decrypted:", decrypted_message)

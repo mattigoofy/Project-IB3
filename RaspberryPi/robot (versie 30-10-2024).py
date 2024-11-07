@@ -66,10 +66,11 @@ def is_valid_email(email):
 # Verwerk registratie informatie
 def handle_register(payload):
     try:
+        payload = decrypt(payload)
         data = json.loads(payload)
         username = data.get("Username")
         password = data.get("Password")
-        password = decrypt(password)
+        # password = decrypt(password)
         email = data.get("Email")
 
         if not is_valid_email(email):
@@ -103,10 +104,11 @@ def handle_register(payload):
 # Verwerk login informatie
 def handle_login(payload):
     try:
+        payload = decrypt(payload)
         data = json.loads(payload)
         username = data.get("Username")
         password = data.get("Password")
-        password = decrypt(password)
+        # password = decrypt(password)
 
         connection = connect_to_db()
         if connection:

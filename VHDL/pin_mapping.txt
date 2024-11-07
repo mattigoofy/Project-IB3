@@ -1,0 +1,49 @@
+top left: (JA)
+1           2           3           4
+CW1         CW2         CW3         CW4
+
+1           2           3           4
+CCW1        CCW2        CCW3        CCW4
+
+
+top right: (JB)
+1           2           3           4
+PMW1        PWM2        PWM3        PWM4
+
+1           2           3           4
+
+
+
+
+top left: (JA)
+1 (J1)      2 (L2)      3 (J2)      4
+PWM1        CW1         CCW1         
+
+1 (H1)      2 (K2)      3 (H2)      4
+PWM2        CW2         CCW2         
+
+
+top right: (JB)
+1 (A14)     2 (A16)     3 (B15)     4
+PWM3        CW3         CCW3         
+
+1 (A15)     2 (A17)     3 (C15)     4
+PWM4        CW4         CCW4         
+
+
+
+
+top left: (JA)
+1 (J1)      2 (L2)      3 (J2)      4
+PWM1        CW1         CCW1         
+
+1 (H1)      2 (K2)      3 (H2)      4
+PWM3        CW3         CCW3         
+
+
+top right: (JB)
+1 (A14)     2 (A16)     3 (B15)     4
+PWM2        CW2         CCW2         
+
+1 (A15)     2 (A17)     3 (C15)     4
+PWM4        CW4         CCW4         
