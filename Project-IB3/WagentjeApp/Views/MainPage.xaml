@@ -5,7 +5,7 @@
              Title="Wagentje App">
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Log Out"
+        <ToolbarItem Text="Uitloggen"
                      Priority="0"
                      Order="Primary"
                      Clicked="OnLogoutClicked" />
