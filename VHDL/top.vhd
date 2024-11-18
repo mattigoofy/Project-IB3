@@ -5,16 +5,18 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity top is
     generic (
+        baud_rate: integer := 9600;
+        clock_frequency: integer := 100000000;
         speed_length: integer := 5;
         direction_length: integer := 3
     );
     Port ( 
         clk: in std_logic;
         -- for testing
-        speed: in std_logic_vector (speed_length-1 downto 0);
-        direction: in std_logic_vector (direction_length-1 downto 0);
+        -- speed: in std_logic_vector (speed_length-1 downto 0);
+        -- direction: in std_logic_vector (direction_length-1 downto 0);
         -- UART
-        -- UART_in: in std_logic;
+        UART_in: in std_logic;
         PWM_out, CW, CCW: out std_logic_vector (3 downto 0)     -- LV, RV, LA, RA
     );
 end top;
@@ -62,44 +64,60 @@ architecture Behavioral of top is
     end component;
 
     -- UART
+    component uart_bits is
+        generic(
+            BAUD_RATE : integer;
+            CLOCK_FREQ : integer
+        );
+        port (
+            clk: in std_logic;
+            din: in std_logic;
+            new_data: out std_logic;
+            dout: out std_logic_vector (7 downto 0)
+        );
+    end component;
 
     type matrix is array (0 to 3) of std_logic_vector (speed_length-1 downto 0);
     signal s_speed: matrix;
     signal s_direction: std_logic_vector (3 downto 0);
-    signal clk_main, clk_slow_5: std_logic;
-    signal sync_speed: std_logic_vector (speed_length-1 downto 0);
-    signal sync_direction: std_logic_vector (direction_length-1 downto 0);
+    signal clk_main, clk_slow_5, clk_100M: std_logic;
+    signal speed: std_logic_vector (speed_length-1 downto 0);
+    signal direction: std_logic_vector (direction_length-1 downto 0);
+
+    signal uart_byte: std_logic_vector (7 downto 0) := (others => '1');
+    signal new_byte: std_logic;
+    signal sync_UART: std_logic;
 begin
     -- synchronizers
-    inst_sync_speed: synchronizer
-        generic map (
-            length => speed_length
-        )
-        port map(
-            din => speed,
-            clk => clk_slow_5,
-            dout => sync_speed
-        );
-        
-    inst_sync_direction: synchronizer
-        generic map (
-            length => direction_length
-        )
-        port map(
-            din => direction,
-            clk => clk_slow_5,
-            dout => sync_direction
-        );
-        
-    -- inst_sync_UART: synchronizer
+    -- inst_sync_speed: synchronizer
     --     generic map (
-    --         length => 1
-    --     );
+    --         length => speed_length
+    --     )
     --     port map(
-    --         din => UART,
+    --         din => speed,
     --         clk => clk_slow_5,
-    --         dout => sync_UART
+    --         dout => sync_speed
     --     );
+        
+    -- inst_sync_direction: synchronizer
+    --     generic map (
+    --         length => direction_length
+    --     )
+    --     port map(
+    --         din => direction,
+    --         clk => clk_slow_5,
+    --         dout => sync_direction
+    --     );
+        
+    inst_sync_UART: synchronizer
+        generic map (
+            length => 1
+        )
+        port map(
+            din(0) => UART_in,
+            clk => clk_slow_5,
+            dout(0) => sync_UART
+        );
 
     -- motors
     inst_motor_LV: motor
@@ -152,7 +170,7 @@ begin
     inst_PLL : clk_wiz_0
         port map ( 
             -- Clock out ports  
-            clk_main => open,
+            clk_main => clk_100M,
             clk_slow_4 => open,
             clk_slow_5 => open,
             clk_slow_8 => open,
@@ -164,36 +182,58 @@ begin
             -- Clock in ports
             clk_in1 => clk
         );
-        
+
+    inst_uart_bits: uart_bits
+        generic map (
+            BAUD_RATE => baud_rate,
+            CLOCK_FREQ => clock_frequency
+        )
+        port map (
+            clk => clk_100M,
+            din => sync_UART,
+            new_data => new_byte,
+            dout => uart_byte
+        );
+
+
+    process(clk_100M)
+    begin
+        if rising_edge(clk_100M) then
+            if new_byte = '1' then
+                direction <= uart_byte(7 downto 5);
+                speed <= uart_byte(4 downto 0);
+            end if;
+        end if;
+    end process;
 
 
     process(clk_slow_5)
     begin
         if(rising_edge(clk_slow_5)) then
-            case sync_direction is
+            case direction is
                 when "000" =>               -- Forwards
                     s_direction <= "1100";
-                    s_speed <= (others => sync_speed);
+                    s_speed <= (others => speed);
                     
                 when "001" =>               -- Backwards
                     s_direction <= "0011";
-                    s_speed <= (others => sync_speed);
+                    s_speed <= (others => speed);
                 
                 when "010" =>               -- Left
                     s_direction <= "0101";
-                    s_speed <= (others => sync_speed);
+                    s_speed <= (others => speed);
                     
                 when "011" =>               -- Right
                     s_direction <= "1010";
-                    s_speed <= (others => sync_speed);
+                    s_speed <= (others => speed);
                     
                 when "100" =>               -- Turn Left
                     s_direction <= "0110";
-                    s_speed <= (others => sync_speed);
+                    s_speed <= (others => speed);
                     
                 when "101" =>               -- Turn Right
                     s_direction <= "1001";
-                    s_speed <= (others => sync_speed);
+                    s_speed <= (others => speed);
 
                 when others =>              -- default = idle
                     s_direction <= "1111";
