@@ -33,6 +33,7 @@ namespace WagentjeApp.Services
         private TaskCompletionSource<bool> _registerCompletionSource;
         private TaskCompletionSource<List<Traject>> _loadTrajectsCompletionSource;
         private TaskCompletionSource<bool> _executeTrajectCompletionSource;
+        private TaskCompletionSource<Measurement> _measurementCompletionSource;
         private User _currentUser; // Voor het opslaan van de huidige gebruiker
         //private string _mqttServerIp = "192.168.0.143"; // Standaard IP-adres
         private string _mqttServerIp = "172.18.230.3"; // Standaard IP-adres
@@ -63,6 +64,7 @@ namespace WagentjeApp.Services
                 await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/load_trajects/response").Build());
                 await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/execute_traject/response").Build());
                 await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/execute_command/response").Build());
+                await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/measurement").Build());
             }
         }
 
@@ -125,6 +127,18 @@ namespace WagentjeApp.Services
             {
                 bool isSuccess = message.Equals("true", StringComparison.OrdinalIgnoreCase);
                 _executeTrajectCompletionSource?.SetResult(isSuccess);
+            }
+            if (topic == "raspberrypi/measurement")
+            {
+                try
+                {
+                    var measurement = JsonConvert.DeserializeObject<Measurement>(message);
+                    _measurementCompletionSource?.SetResult(measurement);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Fout bij verwerking meetwaarde: {ex.Message}");
+                }
             }
         }
 
@@ -307,10 +321,21 @@ namespace WagentjeApp.Services
             InitializeMqttOptions(); // Update the MQTT options with the new IP address
         }
 
-        // Example method to get the latest measurement
+        // Method to get the latest measurement
         public async Task<Measurement> GetLatestMeasurementAsync()
         {
-            return await Task.FromResult(new Measurement { Value = 42 });
+            _measurementCompletionSource = new TaskCompletionSource<Measurement>();
+
+            // Wacht op het bericht of een timeout
+            var measurement = await Task.WhenAny(_measurementCompletionSource.Task, Task.Delay(10000)) == _measurementCompletionSource.Task
+                ? _measurementCompletionSource.Task.Result
+                : null;
+
+            if (measurement == null)
+            {
+                throw new TimeoutException("Geen meetwaarde ontvangen binnen 10 seconden.");
+            }
+            return measurement;
         }
 
         // Dummy Measurement class (replace with actual implementation)
