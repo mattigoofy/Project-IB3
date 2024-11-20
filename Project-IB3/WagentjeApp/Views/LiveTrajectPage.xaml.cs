@@ -18,8 +18,10 @@ namespace WagentjeApp.Views
 
         private string _currentCommand;
 
-        private void OnForwardPressed(object sender, EventArgs e)
+        private  void OnForwardPressed(object sender, EventArgs e)
         {
+            //SendCommandAsync("Vooruit", 5);
+            //SendCommandAsync("Vooruit", 1);
             StartCommand("Vooruit");
         }
 
@@ -36,6 +38,15 @@ namespace WagentjeApp.Views
         private void OnRightPressed(object sender, EventArgs e)
         {
             StartCommand("Rechts");
+        }
+        private void OnTurnLeftPressed(object sender, EventArgs e)
+        {
+            StartCommand("Links_draaien");
+        }
+
+        private void OnTurnRightPressed(object sender, EventArgs e)
+        {
+            StartCommand("Rechts_draaien");
         }
 
         private void OnButtonReleased(object sender, EventArgs e)
@@ -68,7 +79,7 @@ namespace WagentjeApp.Views
             var currentUser = MqttService.Instance.GetCurrentUser();
             int userId = currentUser.UserId;
             var command = new TrajectCommand(commandName, duration, commandName);
-            await MqttService.Instance.ExecuteCommandAsync(command, userId);
+            MqttService.Instance.ExecuteCommandAsync(command, userId);
         }
     }
 }
