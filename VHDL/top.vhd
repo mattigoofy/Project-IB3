@@ -17,6 +17,8 @@ entity top is
         -- direction: in std_logic_vector (direction_length-1 downto 0);
         -- UART
         UART_in: in std_logic;
+        direction_temp: out std_logic_vector (2 downto 0);
+        speed_temp: out std_logic_vector (4 downto 0);
         PWM_out, CW, CCW: out std_logic_vector (3 downto 0)     -- LV, RV, LA, RA
     );
 end top;
@@ -243,5 +245,7 @@ begin
         end if;
     end process;
 
+    direction_temp <= direction;
+    speed_temp <= speed;
 
 end Behavioral;

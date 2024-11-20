@@ -22,6 +22,8 @@ architecture behavior of top_TB is
         Port ( 
             clk: in std_logic;
             UART_in: in std_logic;
+            direction_temp: out std_logic_vector (2 downto 0);
+            speed_temp: out std_logic_vector (4 downto 0);
             PWM_out, CW, CCW: out std_logic_vector (3 downto 0)  -- LV, RV, LA, RA
         );
     end component;
@@ -29,6 +31,8 @@ architecture behavior of top_TB is
     -- Signals for connecting to the UUT
     signal clk: std_logic := '0';
     signal UART_in: std_logic := '1';  -- idle state for UART
+    signal direction_temp: std_logic_vector (2 downto 0);
+    signal speed_temp: std_logic_vector (4 downto 0);
     signal PWM_out: std_logic_vector(3 downto 0);
     signal CW: std_logic_vector(3 downto 0);
     signal CCW: std_logic_vector(3 downto 0);
@@ -57,6 +61,8 @@ begin
         port map (
             clk => clk,
             UART_in => UART_in,
+            direction_temp => direction_temp,
+            speed_temp => speed_temp,
             PWM_out => PWM_out,
             CW => CW,
             CCW => CCW
