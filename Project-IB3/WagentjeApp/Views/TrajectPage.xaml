@@ -20,6 +20,8 @@
                     <x:String>Achteruit</x:String>
                     <x:String>Links</x:String>
                     <x:String>Rechts</x:String>
+                    <x:String>Links_draaien</x:String>
+                    <x:String>Rechts_draaien</x:String>
                 </x:Array>
             </Picker.ItemsSource>
         </Picker>

@@ -31,7 +31,7 @@ namespace WagentjeApp.Views
             {
                 Id = t.Id,
                 Name = t.Name,
-                Commands = t.Commands.Select(c => new TrajectCommand(c.Name, c.Duration, c.Action)).ToList()
+                Commands = t.Commands.Select(c => new TrajectCommand(c.Name, c.Duration, c.Action, 50)).ToList()
             }).ToList();
 
             SavedTrajectsListView.ItemsSource = _savedTrajects.Select(t => t.Name);
@@ -70,7 +70,7 @@ namespace WagentjeApp.Views
                     if (parts.Length == 2 && int.TryParse(parts[1].Replace(" seconden", ""), out int duration))
                     {
                         string actionName = parts[0];
-                        return new TrajectCommand(actionName, duration, actionName);
+                        return new TrajectCommand(actionName, duration, actionName, 50);
                     }
                     return null;
                 }).Where(c => c != null).ToArray();

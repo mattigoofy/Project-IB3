@@ -9,10 +9,17 @@
                FontSize="24"
                HorizontalOptions="Center" />
 
-        <ListView x:Name="MeasurementsListView">
+        <!--<ListView x:Name="MeasurementsListView">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <TextCell Text="{Binding Measurement}" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>-->
+        <ListView x:Name="MeasurementsListView">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextCell Text="{Binding}" />
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

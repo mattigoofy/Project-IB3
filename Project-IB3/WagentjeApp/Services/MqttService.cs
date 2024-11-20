@@ -65,6 +65,7 @@ namespace WagentjeApp.Services
                 await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/execute_traject/response").Build());
                 await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/execute_command/response").Build());
                 await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/measurement").Build());
+                await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/all_measurement").Build());
             }
         }
 
@@ -186,7 +187,7 @@ namespace WagentjeApp.Services
             var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new
             {
                 Username = username,
-                Password = AesEncryption.Encrypt(password),
+                Password = password,
                 Email = email
             });
             payload = AesEncryption.Encrypt(payload);

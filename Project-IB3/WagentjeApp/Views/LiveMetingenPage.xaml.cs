@@ -24,11 +24,21 @@ namespace WagentjeApp.Views
         {
             while (true)
             {
+                //// Krijg de laatste meting van MQTT
+                //var measurement = await MqttService.Instance.GetLatestMeasurementAsync();
+
+                //// Voeg de meting toe aan de ObservableCollection
+                //measurements.Add($"Measurement: {measurement.Value}"); // Format de meting als string
+
+                //await Task.Delay(1000); // Even wachten voor de volgende meting
                 // Krijg de laatste meting van MQTT
                 var measurement = await MqttService.Instance.GetLatestMeasurementAsync();
 
-                // Voeg de meting toe aan de ObservableCollection
-                measurements.Add($"Measurement: {measurement.Value}"); // Format de meting als string
+                // Voeg de meting toe aan de ObservableCollection op de hoofdthread
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    measurements.Add($"Measurement: {measurement.Value}");
+                });
 
                 await Task.Delay(1000); // Even wachten voor de volgende meting
             }

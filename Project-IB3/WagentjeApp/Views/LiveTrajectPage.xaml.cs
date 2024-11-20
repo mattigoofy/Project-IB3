@@ -20,22 +20,26 @@ namespace WagentjeApp.Views
 
         private void OnForwardPressed(object sender, EventArgs e)
         {
-            StartCommand("Vooruit");
+            SendCommandAsync("Vooruit", 1);
+            //StartCommand("Vooruit");
         }
 
         private void OnBackwardPressed(object sender, EventArgs e)
         {
-            StartCommand("Achteruit");
+            SendCommandAsync("Achteruit", 1);
+            //StartCommand("Achteruit");
         }
 
         private void OnLeftPressed(object sender, EventArgs e)
         {
-            StartCommand("Links");
+            SendCommandAsync("Links", 1);
+            //StartCommand("Links");
         }
 
         private void OnRightPressed(object sender, EventArgs e)
         {
-            StartCommand("Rechts");
+            SendCommandAsync("Rechts", 1);
+            //StartCommand("Rechts");
         }
 
         private void OnButtonReleased(object sender, EventArgs e)
@@ -67,7 +71,7 @@ namespace WagentjeApp.Views
         {
             var currentUser = MqttService.Instance.GetCurrentUser();
             int userId = currentUser.UserId;
-            var command = new TrajectCommand(commandName, duration, commandName);
+            var command = new TrajectCommand(commandName, duration, commandName, 50);
             await MqttService.Instance.ExecuteCommandAsync(command, userId);
         }
     }

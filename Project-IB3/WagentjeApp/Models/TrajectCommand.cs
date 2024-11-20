@@ -12,12 +12,14 @@
         public string Action { get; set; }
         public int Duration { get; set; }
         public string Name { get; set; }
+        public int Speed { get; set; }
 
-        public TrajectCommand(string action, int duration, string name)
+        public TrajectCommand(string action, int duration, string name, int speed)
         {
             Action = action;
             Duration = duration;
             Name = name;
+            speed = speed;
         }
     }
 }
