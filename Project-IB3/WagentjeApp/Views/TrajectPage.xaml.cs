@@ -123,6 +123,7 @@ namespace WagentjeApp.Views
 
                 if (traject != null)
                 {
+                    
                     var currentUser = MqttService.Instance.GetCurrentUser();
                     int userId = currentUser.UserId;
                     await MqttService.Instance.ExecuteTrajectAsync(traject.Id, userId);

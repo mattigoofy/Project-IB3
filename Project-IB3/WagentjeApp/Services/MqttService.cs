@@ -212,9 +212,10 @@ namespace WagentjeApp.Services
                 UserId = userId,
                 Command = command
             });
-
+            await ConnectAsync();
             string topic = "raspberrypi/execute_command";
             await PublishMessageAsync(topic, payload);
+            await DisconnectAsync();
         }
 
         // Method to execute a trajectory
