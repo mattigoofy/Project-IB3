@@ -19,22 +19,22 @@
             <Label Grid.Row="0" Grid.Column="0" />
 
             <!-- Vooruit knop met pijl omhoog -->
-            <Button Text="⬆" FontSize="32" Clicked="OnForwardClicked"
+            <Button Text="⬆" FontSize="32" Pressed="OnForwardPressed" Released="OnButtonReleased"
                     Grid.Row="0" Grid.Column="1" />
 
             <!-- Leeg veld rechtsboven -->
             <Label Grid.Row="0" Grid.Column="2" />
 
             <!-- Links knop met pijl naar links -->
-            <Button Text="⬅" FontSize="32" Clicked="OnLeftClicked"
+            <Button Text="⬅" FontSize="32" Pressed="OnLeftPressed" Released="OnButtonReleased"
                     Grid.Row="1" Grid.Column="0" />
 
             <!-- Achteruit knop met pijl omlaag -->
-            <Button Text="⬇" FontSize="32" Clicked="OnBackwardClicked"
+            <Button Text="⬇" FontSize="32" Pressed="OnBackwardPressed" Released="OnButtonReleased"
                     Grid.Row="3" Grid.Column="1" />
 
             <!-- Rechts knop met pijl naar rechts -->
-            <Button Text="⮕" FontSize="32" Clicked="OnRightClicked"
+            <Button Text="⮕" FontSize="32" Pressed="OnRightPressed" Released="OnButtonReleased"
                     Grid.Row="1" Grid.Column="2" />
         </Grid>
     </StackLayout>

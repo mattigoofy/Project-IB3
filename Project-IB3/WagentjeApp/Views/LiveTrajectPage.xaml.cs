@@ -1,42 +1,73 @@
 using Microsoft.Maui.Controls;
 using WagentjeApp.Services;
 using WagentjeApp.Models;
+using System.Timers;
 
 namespace WagentjeApp.Views
 {
     public partial class LiveTrajectPage : ContentPage
     {
+        private System.Timers.Timer _commandTimer;
+
         public LiveTrajectPage()
         {
             InitializeComponent();
+            _commandTimer = new System.Timers.Timer(200); // Interval in milliseconden
+            _commandTimer.Elapsed += OnTimerElapsed;
         }
 
-        private async void OnForwardClicked(object sender, EventArgs e)
+        private string _currentCommand;
+
+        private void OnForwardPressed(object sender, EventArgs e)
         {
-            await SendCommandAsync("Vooruit", 5);
+            StartCommand("Vooruit");
         }
 
-        private async void OnBackwardClicked(object sender, EventArgs e)
+        private void OnBackwardPressed(object sender, EventArgs e)
         {
-            await SendCommandAsync("Achteruit", 5);
+            StartCommand("Achteruit");
         }
 
-        private async void OnLeftClicked(object sender, EventArgs e)
+        private void OnLeftPressed(object sender, EventArgs e)
         {
-            await SendCommandAsync("Links", 2);
+            StartCommand("Links");
         }
 
-        private async void OnRightClicked(object sender, EventArgs e)
+        private void OnRightPressed(object sender, EventArgs e)
         {
-            await SendCommandAsync("Rechts", 2);
+            StartCommand("Rechts");
+        }
+
+        private void OnButtonReleased(object sender, EventArgs e)
+        {
+            StopCommand();
+        }
+
+        private void StartCommand(string commandName)
+        {
+            _currentCommand = commandName;
+            _commandTimer.Start(); // Start de timer
+            SendCommandAsync(commandName, 1); // Directe actie voor snelle respons
+        }
+
+        private void StopCommand()
+        {
+            _commandTimer.Stop(); // Stop de timer
+        }
+
+        private async void OnTimerElapsed(object sender, ElapsedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(_currentCommand))
+            {
+                await SendCommandAsync(_currentCommand, 1);
+            }
         }
 
         private async Task SendCommandAsync(string commandName, int duration)
         {
-            // Zorg ervoor dat je de juiste constructor gebruikt voor TrajectCommand
+            var currentUser = MqttService.Instance.GetCurrentUser();
+            int userId = currentUser.UserId;
             var command = new TrajectCommand(commandName, duration, commandName);
-
-            int userId = 1; // Hier moet je de juiste userId verkrijgen, dit kan uit een sessie of een andere bron komen
             await MqttService.Instance.ExecuteCommandAsync(command, userId);
         }
     }
