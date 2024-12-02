@@ -59,7 +59,10 @@
                     Pressed="OnTurnLeftPressed" 
                     Released="OnButtonReleased"
                     Grid.Row="4" 
-                    Grid.Column="1" />
+                    Grid.Column="0" />
+            
+            <!-- Leeg veld ondermidden -->
+            <Label Grid.Row="4" Grid.Column="1" />
 
             <!-- Draai rechts -->
             <Button Text="⭮" 
@@ -69,5 +72,20 @@
                     Grid.Row="4" 
                     Grid.Column="2" />
         </Grid>
+
+        <!-- Slider -->
+        <Slider x:Name="ValueSlider"
+                Minimum="0"
+                Maximum="100"
+                Value="50"
+                ValueChanged="OnSliderValueChanged" />
+
+        <!-- Label to display the slider's value -->
+        <Label x:Name="SliderValueLabel"
+               Text="50"
+               HorizontalOptions="Center" />
     </StackLayout>
+    <!--<VerticalStackLayout Padding="20" Spacing="10">
+
+    </VerticalStackLayout>-->
 </ContentPage>

@@ -11,6 +11,7 @@ namespace WagentjeApp.Views
     {
         private List<string> _commands; // Lijst om commando's op te slaan
         private List<Traject> _savedTrajects; // Gebruik Models.Traject om op te slaan in de UI
+        private int moveSpeed = 50;
 
         public TrajectPage()
         {
@@ -31,7 +32,7 @@ namespace WagentjeApp.Views
             {
                 Id = t.Id,
                 Name = t.Name,
-                Commands = t.Commands.Select(c => new TrajectCommand(c.Name, c.Duration, c.Action, 50)).ToList()
+                Commands = t.Commands.Select(c => new TrajectCommand(c.Action, c.Duration, c.Name, c.Speed)).ToList()
             }).ToList();
 
             SavedTrajectsListView.ItemsSource = _savedTrajects.Select(t => t.Name);
@@ -40,7 +41,7 @@ namespace WagentjeApp.Views
         private void OnAddCommandButtonClicked(object sender, EventArgs e)
         {
             string selectedCommand = CommandPicker.SelectedItem as string;
-            if (int.TryParse(DurationEntry.Text, out int duration) && !string.IsNullOrEmpty(selectedCommand))
+            if (double.TryParse(DurationEntry.Text, out double duration) && !string.IsNullOrEmpty(selectedCommand))
             {
                 _commands.Add($"{selectedCommand} - {duration} seconden");
                 CommandsListView.ItemsSource = null;
@@ -51,6 +52,13 @@ namespace WagentjeApp.Views
             {
                 DisplayAlert("Error", "Voer een geldige duur in.", "OK");
             }
+        }
+
+        private void OnSliderValueChanged(object sender, ValueChangedEventArgs e)
+        {
+            // Update the label with the current slider value
+            SliderValueLabel.Text = $"{e.NewValue:F0}"; // Display as a whole number
+            moveSpeed = (int)e.NewValue;
         }
 
         private async void OnSaveTrajectButtonClicked(object sender, EventArgs e)
@@ -67,10 +75,10 @@ namespace WagentjeApp.Views
                 var commands = _commands.Select(command =>
                 {
                     var parts = command.Split(" - ");
-                    if (parts.Length == 2 && int.TryParse(parts[1].Replace(" seconden", ""), out int duration))
+                    if (parts.Length == 2 && double.TryParse(parts[1].Replace(" seconden", ""), out double duration))
                     {
                         string actionName = parts[0];
-                        return new TrajectCommand(actionName, duration, actionName, 50);
+                        return new TrajectCommand(actionName, duration, actionName, moveSpeed);
                     }
                     return null;
                 }).Where(c => c != null).ToArray();
@@ -94,6 +102,20 @@ namespace WagentjeApp.Views
                 }
             }
         }
+
+        private void OnDeleteCommandButtonClicked(object sender, EventArgs e)
+        {
+            var button = sender as Button;
+            var command = button?.CommandParameter as string;
+
+            if (!string.IsNullOrEmpty(command) && _commands.Contains(command))
+            {
+                _commands.Remove(command);
+                CommandsListView.ItemsSource = null; // Refresh the ListView
+                CommandsListView.ItemsSource = _commands;
+            }
+        }
+
 
         private async void OnDeleteTrajectButtonClicked(object sender, EventArgs e)
         {
@@ -131,5 +153,38 @@ namespace WagentjeApp.Views
                 }
             }
         }
+        private void OnEditTrajectButtonClicked(object sender, EventArgs e)
+        {
+            if (SavedTrajectsListView.SelectedItem != null)
+            {
+                string selectedTrajectName = SavedTrajectsListView.SelectedItem as string;
+                var traject = _savedTrajects.FirstOrDefault(t => t.Name == selectedTrajectName);
+
+                if (traject != null)
+                {
+                    // Prefill the trajectory name and commands for editing
+                    TrajectNameEntry.Text = traject.Name;
+                    _commands.Clear();
+                    foreach (var command in traject.Commands)
+                    {
+                        _commands.Add($"{command.Action} - {command.Duration} seconden");
+                    }
+
+                    CommandsListView.ItemsSource = null;
+                    CommandsListView.ItemsSource = _commands;
+
+                    DisplayAlert("Edit Mode", "Het traject is geladen voor bewerking.", "OK");
+                }
+                else
+                {
+                    DisplayAlert("Fout", "Het geselecteerde traject kon niet worden geladen.", "OK");
+                }
+            }
+            else
+            {
+                DisplayAlert("Fout", "Selecteer eerst een traject om te bewerken.", "OK");
+            }
+        }
+
     }
 }
