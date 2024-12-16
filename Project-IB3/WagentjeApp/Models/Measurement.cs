@@ -8,7 +8,8 @@ namespace WagentjeApp.Models
 {
     public class Measurement
     {
-        public string Type { get; set; }
+        //public string Type { get; set; }
+        public int Id { get; set; }
         public double Value { get; set; }
         public DateTime Timestamp { get; set; }
     }

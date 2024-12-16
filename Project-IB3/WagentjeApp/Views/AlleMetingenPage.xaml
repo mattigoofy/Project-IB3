@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="WagentjeApp.Views.AlleMetingenPage"
+             Title="Alle Metingen">
+
+    <StackLayout Padding="20">
+        <Label Text="Alle Metingen"
+               FontSize="50"
+               HorizontalOptions="Center"
+               Padding="10"/>
+
+        <!-- Time Inputs -->
+        <StackLayout Orientation="Horizontal" Spacing="10" HorizontalOptions="Center">
+            <Label Text="Start Timestamp:" FontSize="16" VerticalTextAlignment="Center" />
+            <DatePicker x:Name="StartDatePicker"
+                        MinimumDate="01/01/2024"
+                        MaximumDate="12/31/2025" />
+            <TimePicker x:Name="StartTimePicker" Format="HH:mm"  />
+        </StackLayout>
+
+        <StackLayout Orientation="Horizontal" Spacing="10" HorizontalOptions="Center">
+            <Label Text="End Timestamp:" FontSize="16" VerticalTextAlignment="Center" />
+            <DatePicker x:Name="EndDatePicker"
+                        MinimumDate="01/01/2024"
+                        MaximumDate="12/31/2025" />
+            <TimePicker x:Name="EndTimePicker" Format="HH:mm" />
+        </StackLayout>
+
+        <!-- Number Inputs -->
+        <StackLayout Orientation="Horizontal" Spacing="10" HorizontalOptions="Center">
+            <Label Text="Min Value:" FontSize="16" VerticalTextAlignment="Center" />
+            <Entry x:Name="MinValueEntry" Keyboard="Numeric" Placeholder="Minimum" />
+            <Label Text="Max Value:" FontSize="16" VerticalTextAlignment="Center" />
+            <Entry x:Name="MaxValueEntry" Keyboard="Numeric" Placeholder="Maximum" />
+        </StackLayout>
+
+        <Button Text="Filter"
+                Clicked="OnFilterClicked" />
+        <Button Text="Reset"
+                Clicked="OnResetClicked" />
+
+
+        <!-- Header Row for the Table -->
+        <Grid ColumnDefinitions="*,*,*"
+              Padding="10"
+              VerticalOptions="Start">
+            <Label Text="ID" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+            <Label Text="Value" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" Grid.Column="1" />
+            <Label Text="Timestamp" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" Grid.Column="2" />
+        </Grid>
+
+        <!-- ListView to Display Measurements -->
+        <ListView x:Name="MeasurementsListView" SelectionMode="Single" SeparatorVisibility="None">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <!-- Row in the Table -->
+                        <Grid ColumnDefinitions="*,*,*" Padding="10">
+                            <Label Text="{Binding Id}" FontSize="14" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                            <Label Text="{Binding Value}" FontSize="14" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" Grid.Column="1" />
+                            <Label Text="{Binding Timestamp}" FontSize="14" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" Grid.Column="2" />
+                        </Grid>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </StackLayout>
+</ContentPage>

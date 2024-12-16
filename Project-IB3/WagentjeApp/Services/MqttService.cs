@@ -8,6 +8,7 @@ using System.Text;
 using WagentjeApp.Models;  // Gebruik enkel de Models namespace voor Traject en TrajectCommand
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
+using System.Linq.Expressions;
 
 namespace WagentjeApp.Services
 {
@@ -32,6 +33,7 @@ namespace WagentjeApp.Services
         private TaskCompletionSource<bool> _loginCompletionSource;
         private TaskCompletionSource<bool> _registerCompletionSource;
         private TaskCompletionSource<List<Traject>> _loadTrajectsCompletionSource;
+        private TaskCompletionSource<List<Measurement>> _allMeasurementsCompletionSource;
         private TaskCompletionSource<bool> _executeTrajectCompletionSource;
         private TaskCompletionSource<Measurement> _measurementCompletionSource;
         private User _currentUser; // Voor het opslaan van de huidige gebruiker
@@ -64,8 +66,9 @@ namespace WagentjeApp.Services
                 await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/load_trajects/response").Build());
                 await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/execute_traject/response").Build());
                 await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/execute_command/response").Build());
+                await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/all_measurements/response").Build());
                 await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/measurement").Build());
-                await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/all_measurement").Build());
+                await _client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("raspberrypi/live_measurement").Build());
             }
         }
 
@@ -131,15 +134,21 @@ namespace WagentjeApp.Services
             }
             if (topic == "raspberrypi/measurement")
             {
-                try
-                {
-                    var measurement = JsonConvert.DeserializeObject<Measurement>(message);
-                    _measurementCompletionSource?.SetResult(measurement);
+                try {
+                    var measurement = Newtonsoft.Json.JsonConvert.DeserializeObject<Measurement>(message);
+                    _measurementCompletionSource?.TrySetResult(measurement);
+                    //_measurementCompletionSource = null;
                 }
                 catch (Exception ex)
-                {
+                    {
                     Console.WriteLine($"Fout bij verwerking meetwaarde: {ex.Message}");
+
                 }
+            }
+            if (topic == "raspberrypi/all_measurements/response")
+            {
+                var measurements = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Measurement>>(message);
+                _allMeasurementsCompletionSource?.SetResult(measurements);
             }
         }
 
@@ -262,9 +271,9 @@ namespace WagentjeApp.Services
         }
 
         // Method to save a new trajectory
-        public async Task SaveTrajectAsync(Traject traject, int userId)
+        public async Task SaveTrajectAsync(Traject traject, int userId, bool edit, int trajectId)
         {
-            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new { UserId = userId, Traject = traject });
+            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new { UserId = userId, Traject = traject, Edit = edit, TrajectId = trajectId});
             await ConnectAsync();
 
             try
@@ -281,6 +290,44 @@ namespace WagentjeApp.Services
             }
         }
 
+        // Method for loading measurements
+        public async Task<List<Measurement>> LoadMeasurementsAsync(DateTime startTimestamp, DateTime endTimestamp, int startValue, int endValue)
+        {
+            //var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new { UserId = userId });
+            var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new { startTimestamp = startTimestamp,
+                                                                            endTimestamp = endTimestamp,        
+                                                                            startValue = startValue,
+                                                                            endValue = endValue            
+            });
+            _allMeasurementsCompletionSource = new TaskCompletionSource<List<Measurement>>();
+
+            await ConnectAsync();
+            await PublishMessageAsync("raspberrypi/all_measurements", payload);
+
+            var measurementsList = await Task.WhenAny(_allMeasurementsCompletionSource.Task, Task.Delay(30000)) == _allMeasurementsCompletionSource.Task
+                ? _allMeasurementsCompletionSource.Task.Result
+                : new List<Measurement>();
+
+            await DisconnectAsync();
+            return measurementsList;
+        }
+
+        // Method to get the latest measurement
+        public async Task<Measurement> GetLatestMeasurementAsync()
+        {
+            _measurementCompletionSource = new TaskCompletionSource<Measurement>();
+
+            // Wacht op het bericht of een timeout
+            var measurement = await Task.WhenAny(_measurementCompletionSource.Task, Task.Delay(10000)) == _measurementCompletionSource.Task
+                ? _measurementCompletionSource.Task.Result
+                : null;
+
+            if (measurement == null)
+            {
+                throw new TimeoutException("Geen meetwaarde ontvangen binnen 10 seconden.");
+            }
+            return measurement;
+        }
 
 
 
@@ -323,28 +370,11 @@ namespace WagentjeApp.Services
             InitializeMqttOptions(); // Update the MQTT options with the new IP address
         }
 
-        // Method to get the latest measurement
-        public async Task<Measurement> GetLatestMeasurementAsync()
-        {
-            _measurementCompletionSource = new TaskCompletionSource<Measurement>();
-
-            // Wacht op het bericht of een timeout
-            var measurement = await Task.WhenAny(_measurementCompletionSource.Task, Task.Delay(10000)) == _measurementCompletionSource.Task
-                ? _measurementCompletionSource.Task.Result
-                : null;
-
-            if (measurement == null)
-            {
-                throw new TimeoutException("Geen meetwaarde ontvangen binnen 10 seconden.");
-            }
-            return measurement;
-        }
-
         // Dummy Measurement class (replace with actual implementation)
-        public class Measurement
-        {
-            public int Value { get; set; }
-        }
+        //public class Measurement
+        //{
+        //    public int Value { get; set; }
+        //}
     }
 
 

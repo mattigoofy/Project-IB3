@@ -30,6 +30,11 @@ namespace WagentjeApp.Views
             await Navigation.PushAsync(new ManueleMetingenPage());
         }
 
+        private async void OnAlleMeasurementsClicked(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new AlleMetingenPage());
+        }
+
         // Method for logging out
         private async void OnLogoutClicked(object sender, EventArgs e)
         {

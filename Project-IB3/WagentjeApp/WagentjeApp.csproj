@@ -65,6 +65,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Update="Views\AlleMetingenPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\LiveMetingenPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

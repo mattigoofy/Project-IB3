@@ -12,6 +12,8 @@ namespace WagentjeApp.Views
         private List<string> _commands; // Lijst om commando's op te slaan
         private List<Traject> _savedTrajects; // Gebruik Models.Traject om op te slaan in de UI
         private int moveSpeed = 50;
+        private bool editting = false;
+        private int editting_id;
 
         public TrajectPage()
         {
@@ -43,15 +45,20 @@ namespace WagentjeApp.Views
             string selectedCommand = CommandPicker.SelectedItem as string;
             if (double.TryParse(DurationEntry.Text, out double duration) && !string.IsNullOrEmpty(selectedCommand))
             {
-                _commands.Add($"{selectedCommand} - {duration} seconden");
+                _commands.Add($"{selectedCommand} - {duration} seconden - {moveSpeed}%");
                 CommandsListView.ItemsSource = null;
                 CommandsListView.ItemsSource = _commands;
-                DurationEntry.Text = string.Empty; // Wis invoer
+                // Wis invoer
+                DurationEntry.Text = string.Empty;
+                CommandPicker.SelectedIndex = -1;
+                SliderValueLabel.Text = "50";
+                ValueSlider.Value = 50;
             }
             else
             {
                 DisplayAlert("Error", "Voer een geldige duur in.", "OK");
             }
+
         }
 
         private void OnSliderValueChanged(object sender, ValueChangedEventArgs e)
@@ -75,10 +82,12 @@ namespace WagentjeApp.Views
                 var commands = _commands.Select(command =>
                 {
                     var parts = command.Split(" - ");
-                    if (parts.Length == 2 && double.TryParse(parts[1].Replace(" seconden", ""), out double duration))
+                    if (parts.Length == 3 && double.TryParse(parts[1].Replace(" seconden", ""), out double duration))
                     {
                         string actionName = parts[0];
-                        return new TrajectCommand(actionName, duration, actionName, moveSpeed);
+                        string speed = parts[2];
+                        TrajectNameEntry.Text = string.Empty;
+                        return new TrajectCommand(actionName, duration, actionName, Int32.Parse(speed) );
                     }
                     return null;
                 }).Where(c => c != null).ToArray();
@@ -93,7 +102,7 @@ namespace WagentjeApp.Views
                         Commands = commands.ToList()
                     };
 
-                    await MqttService.Instance.SaveTrajectAsync(traject, userId);
+                    await MqttService.Instance.SaveTrajectAsync(traject, userId, editting, editting_id);
                     await DisplayAlert("Succes", "Traject opgeslagen!", "OK");
                     _commands.Clear();
                     CommandsListView.ItemsSource = null;
@@ -101,6 +110,7 @@ namespace WagentjeApp.Views
                     LoadSavedTrajects();
                 }
             }
+            editting = false;
         }
 
         private void OnDeleteCommandButtonClicked(object sender, EventArgs e)
@@ -174,6 +184,8 @@ namespace WagentjeApp.Views
                     CommandsListView.ItemsSource = _commands;
 
                     DisplayAlert("Edit Mode", "Het traject is geladen voor bewerking.", "OK");
+                    editting = true;
+                    editting_id = traject.Id;
                 }
                 else
                 {

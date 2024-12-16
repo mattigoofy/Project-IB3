@@ -7,19 +7,30 @@
     <StackLayout Padding="20">
         <Label Text="Live Metingen"
                FontSize="24"
-               HorizontalOptions="Center" />
+               HorizontalOptions="Center"
+               Padding="10"/>
 
-        <!--<ListView x:Name="MeasurementsListView">
+        <!-- Header Row for the Table -->
+        <Grid ColumnDefinitions="*,*,*"
+              Padding="10"
+              VerticalOptions="Start">
+            <Label Text="ID" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+            <Label Text="Value" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" Grid.Column="1" />
+            <Label Text="Timestamp" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" Grid.Column="2" />
+        </Grid>
+
+        <!-- ListView to Display Measurements -->
+        <ListView x:Name="MeasurementsListView" SelectionMode="None" SeparatorVisibility="None">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <TextCell Text="{Binding Measurement}" />
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>-->
-        <ListView x:Name="MeasurementsListView">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <TextCell Text="{Binding}" />
+                    <ViewCell>
+                        <!-- Row in the Table -->
+                        <Grid ColumnDefinitions="*,*,*" Padding="10">
+                            <Label Text="{Binding Id}" FontSize="14" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                            <Label Text="{Binding Value}" FontSize="14" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" Grid.Column="1" />
+                            <Label Text="{Binding Timestamp}" FontSize="14" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" Grid.Column="2" />
+                        </Grid>
+                    </ViewCell>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
