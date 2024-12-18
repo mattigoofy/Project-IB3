@@ -5,7 +5,8 @@ entity sensor is
     generic (
         freq_sens: integer := 40000;
         freq_clk: integer := 100000000;
-        ammount_of_pulses: integer := 50
+        ammount_of_pulses: integer := 50;
+        max_length: integer := 10000
     );
     port (
         clk: in std_logic;
@@ -19,49 +20,64 @@ end sensor;
 
 architecture arch of sensor is
     constant wait_for: integer := ammount_of_pulses * freq_clk / freq_sens;
+    constant max_ticks: integer := ( max_length * (freq_clk/1000) )/331;
 
     signal start_cntr: integer range 0 to wait_for := 0;
     signal time_cntr: integer range 0 to 65536 := 0;
     signal prev_sensor_out: std_logic := '1';
 
     type fsm_states is (INIT, COUNTING);
-    signal state: fsm_states := INIT;
+    signal state_from: fsm_states := INIT;
+    signal state_to: fsm_states := INIT;
 begin
 
-    process(clk)
+    to_sensor: process(clk)
     begin
         if rising_edge(clk) then
-            if start = '1' then         -- starting the output
-                start_cntr <= 0;
-                sensor_in <= '1';
-            end if;
-
-            if start_cntr < wait_for then
-                start_cntr <= start_cntr + 1;
-            else 
-                sensor_in <= '0';
-            end if;
+            case state_to is
+                when INIT =>
+                    if start = '1' then         -- starting the output
+                        start_cntr <= 0;
+                        sensor_in <= '1';
+                        state_to <= COUNTING;
+                    end if;
+                
+                when COUNTING =>
+                    if start_cntr < wait_for then
+                        start_cntr <= start_cntr + 1;
+                    else 
+                        sensor_in <= '0';
+                        state_to <= INIT;
+                    end if;
+            end case;
         end if;
     end process;
 
-    process(clk)
+    from_sensor: process(clk)
     begin
         if rising_edge(clk) then
-            case state is
+            case state_from is
                 when INIT =>
                     new_data <= '0';
                     if start = '1' then
-                        state <= COUNTING;
+                        state_from <= COUNTING;
                         time_cntr <= 0;
                     end if;
 
                 when COUNTING =>
                     if sensor_out > prev_sensor_out then      -- rising edge
-                        state <= INIT;
+                        state_from <= INIT;
                         dout <= 331*time_cntr/(freq_clk/1000);
                         new_data <= '1';
                     else
-                        time_cntr <= time_cntr + 1;
+                        if time_cntr < max_ticks then
+                            time_cntr <= time_cntr + 1;
+                        else    
+                            state_from <= INIT;
+                            dout <= 0;
+                            new_data <= '1';
+                        end if;
+                        
                     end if;
                     prev_sensor_out <= sensor_out;
             end case;

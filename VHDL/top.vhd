@@ -1,12 +1,12 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 
 entity top is
     generic (
         baud_rate: integer := 9600;
-        clock_frequency: integer := 100000000;
+        clock_frequency: integer := 96000000;
         speed_length: integer := 5;
         direction_length: integer := 3
     );
@@ -17,9 +17,13 @@ entity top is
         -- direction: in std_logic_vector (direction_length-1 downto 0);
         -- UART
         UART_in: in std_logic;
-        direction_temp: out std_logic_vector (2 downto 0);
-        speed_temp: out std_logic_vector (4 downto 0);
-        PWM_out, CW, CCW: out std_logic_vector (3 downto 0)     -- LV, RV, LA, RA
+        -- direction_temp: out std_logic_vector (2 downto 0);
+        -- speed_temp: out std_logic_vector (4 downto 0);
+        PWM_out, CW, CCW: out std_logic_vector (3 downto 0);     -- LV, RV, LA, RA
+        UART_out: out std_logic;
+
+        from_sensor: in std_logic;
+        to_sensor: out std_logic
     );
 end top;
 
@@ -54,41 +58,65 @@ architecture Behavioral of top is
         (-- Clock in ports
             -- Clock out ports
             clk_main          : out    std_logic;
-            clk_slow_4          : out    std_logic;
-            clk_slow_5          : out    std_logic;
-            clk_slow_8          : out    std_logic;
-            clk2_slow          : out    std_logic;
-            clk2_fast          : out    std_logic;
+            clk_motors_fast   : out    std_logic;
+            clk_motors_slow   : out    std_logic;
             -- Status and control signals
-            locked            : out    std_logic;
             clk_in1           : in     std_logic
         );
     end component;
 
     -- UART
-    component uart_bits is
+    component uart is
         generic(
-            BAUD_RATE : integer;
-            CLOCK_FREQ : integer
+            BAUD_RATE: integer;
+            CLOCK_FREQ : integer;
+            din_size: integer
         );
         port (
             clk: in std_logic;
-            din: in std_logic;
+    
+            din: in std_logic_vector(din_size-1 downto 0);
+            dout: out std_logic_vector (7 downto 0);
+    
+            start_reading: in std_logic;
             new_data: out std_logic;
-            dout: out std_logic_vector (7 downto 0)
+    
+            UART_in: in std_logic;
+            UART_out: out std_logic
         );
+    end component;
+
+    component sensor is
+        generic (
+            freq_sens: integer;
+            freq_clk: integer;
+            ammount_of_pulses: integer
+        );
+        port (
+            clk: in std_logic;
+            start: in std_logic;
+            sensor_out: in std_logic;
+            sensor_in: out std_logic;
+            dout: out integer range 0 to 65536;
+            new_data: out std_logic
+        ) ;
     end component;
 
     type matrix is array (0 to 3) of std_logic_vector (speed_length-1 downto 0);
     signal s_speed: matrix;
     signal s_direction: std_logic_vector (3 downto 0);
-    signal clk_main, clk_slow_5, clk_100M: std_logic;
+    signal clk_main, clk_motors_slow_5, clk_motors_main: std_logic;
     signal speed: std_logic_vector (speed_length-1 downto 0);
-    signal direction: std_logic_vector (direction_length-1 downto 0);
+    signal direction, prev_direction: std_logic_vector (direction_length-1 downto 0);
 
     signal uart_byte: std_logic_vector (7 downto 0) := (others => '1');
     signal new_byte: std_logic;
     signal sync_UART: std_logic;
+
+    signal start_sensor: std_logic;
+    signal sensor_data: integer range 0 to 65536;
+    signal s_sensor_data: std_logic_vector(15 downto 0);
+    signal sensor_new_data: std_logic;
 begin
     -- synchronizers
     -- inst_sync_speed: synchronizer
@@ -117,7 +145,7 @@ begin
         )
         port map(
             din(0) => UART_in,
-            clk => clk_slow_5,
+            clk => clk_main,
             dout(0) => sync_UART
         );
 
@@ -126,8 +154,8 @@ begin
         port map (
             speed => s_speed(3),
             direction  => s_direction(3),
-            clk => clk_slow_5,
-            clk_fast => clk_main,
+            clk => clk_motors_slow_5,
+            clk_fast => clk_motors_main,
             PWM_out => PWM_out(3),
             CW => CW(3),
             CCW => CCW(3)
@@ -138,8 +166,8 @@ begin
         port map (
             speed => s_speed(2),
             direction  => s_direction(2),
-            clk => clk_slow_5,
-            clk_fast => clk_main,
+            clk => clk_motors_slow_5,
+            clk_fast => clk_motors_main,
             PWM_out => PWM_out(2),
             CW => CW(2),
             CCW => CCW(2)
@@ -149,8 +177,8 @@ begin
         port map (
             speed => s_speed(1),
             direction  => s_direction(1),
-            clk => clk_slow_5,
-            clk_fast => clk_main,
+            clk => clk_motors_slow_5,
+            clk_fast => clk_motors_main,
             PWM_out => PWM_out(1),
             CW => CW(1),
             CCW => CCW(1)
@@ -161,57 +189,69 @@ begin
         port map (
             speed => s_speed(0),
             direction  => s_direction(0),
-            clk => clk_slow_5,
-            clk_fast => clk_main,
+            clk => clk_motors_slow_5,
+            clk_fast => clk_motors_main,
             PWM_out => PWM_out(0),
             CW => CW(0),
             CCW => CCW(0)
         );
 
 
-    inst_PLL : clk_wiz_0
+    inst_MMCM : clk_wiz_0
         port map ( 
-            -- Clock out ports  
-            clk_main => clk_100M,
-            clk_slow_4 => open,
-            clk_slow_5 => open,
-            clk_slow_8 => open,
-            clk2_slow => clk_main,
-            clk2_fast => clk_slow_5,
-            -- Status and control signals                
-            -- reset => '1',
-            locked => open,
-            -- Clock in ports
+            -- -- Clock out ports  
+            -- clk_main => clk_100M,
+            -- clk2_slow => clk_main,
+            -- clk2_fast => clk_slow_5,
+            -- -- Status and control signals                
+            -- -- reset => '1',
+            -- locked => open,
+            -- -- Clock in ports
+            -- clk_in1 => clk
+            clk_main => clk_main,
+            clk_motors_slow => clk_motors_main,
+            clk_motors_fast => clk_motors_slow_5,
             clk_in1 => clk
         );
 
-    inst_uart_bits: uart_bits
+    inst_uart: uart
         generic map (
             BAUD_RATE => baud_rate,
-            CLOCK_FREQ => clock_frequency
+            CLOCK_FREQ => clock_frequency,
+            din_size => 16
         )
         port map (
-            clk => clk_100M,
-            din => sync_UART,
+            clk => clk_main,
+            UART_in => sync_UART,
             new_data => new_byte,
-            dout => uart_byte
+            dout => uart_byte,
+            din => s_sensor_data,
+            start_reading => sensor_new_data,
+            UART_out => UART_out
+        );
+
+    inst_sensor: sensor
+        generic map (
+            freq_sens => 40000,
+            freq_clk => clock_frequency,
+            ammount_of_pulses => 50
+        )
+        port map (
+            clk => clk_main,
+            start => start_sensor,
+            sensor_out => from_sensor,
+            sensor_in => to_sensor,
+            dout => sensor_data,
+            new_data => sensor_new_data
         );
 
 
-    process(clk_100M)
-    begin
-        if rising_edge(clk_100M) then
-            if new_byte = '1' then
-                direction <= uart_byte(7 downto 5);
-                speed <= uart_byte(4 downto 0);
-            end if;
-        end if;
-    end process;
 
-
-    process(clk_slow_5)
+    process(clk_main)
     begin
-        if(rising_edge(clk_slow_5)) then
+        if(rising_edge(clk_main)) then
+
+            start_sensor <= '0';
             case direction is
                 when "000" =>               -- Forwards
                     s_direction <= "1100";
@@ -237,15 +277,32 @@ begin
                     s_direction <= "1001";
                     s_speed <= (others => speed);
 
+                when "110" =>
+                    start_sensor <= '1';
+                    s_direction <= s_direction;
+                    s_speed <= s_speed;
+                    direction <= prev_direction;
+
                 when others =>              -- default = idle
                     s_direction <= "1111";
                     s_speed <= (others => (others => '0'));
 
             end case;
+
+
+            prev_direction <= direction;
+
+
+            if new_byte = '1' then
+                direction <= uart_byte(7 downto 5);
+                speed <= uart_byte(4 downto 0);
+            end if;
         end if;
     end process;
 
-    direction_temp <= direction;
-    speed_temp <= speed;
+    s_sensor_data <= std_logic_vector(to_unsigned(sensor_data, 16));
+
+    -- direction_temp <= direction;
+    -- speed_temp <= speed;
 
 end Behavioral;

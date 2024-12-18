@@ -3,14 +3,10 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_ARITH.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
-entity top_TB is
-    generic(
-        clk_period : time := 10 ns;  -- 100 MHz clock
-        baud_rate_period : time := 104us  -- 9600 bps
-    );
-end top_TB;
+entity tb_top is
+end tb_top;
 
-architecture behavior of top_TB is
+architecture behavior of tb_top is
     -- Component Declaration for the Unit Under Test (UUT)
     component top
         generic (
@@ -22,20 +18,26 @@ architecture behavior of top_TB is
         Port ( 
             clk: in std_logic;
             UART_in: in std_logic;
-            direction_temp: out std_logic_vector (2 downto 0);
-            speed_temp: out std_logic_vector (4 downto 0);
-            PWM_out, CW, CCW: out std_logic_vector (3 downto 0)  -- LV, RV, LA, RA
+            PWM_out, CW, CCW: out std_logic_vector (3 downto 0);  -- LV, RV, LA, RA
+            UART_out: out std_logic;
+            from_sensor: in std_logic;
+            to_sensor: out std_logic
         );
     end component;
+
+    -- Constants
+    constant clk_period : time := 10 ns;  -- 100 MHz clock
+    constant baud_rate_period : time := 104us;  -- 9600 bps
 
     -- Signals for connecting to the UUT
     signal clk: std_logic := '0';
     signal UART_in: std_logic := '1';  -- idle state for UART
-    signal direction_temp: std_logic_vector (2 downto 0);
-    signal speed_temp: std_logic_vector (4 downto 0);
     signal PWM_out: std_logic_vector(3 downto 0);
     signal CW: std_logic_vector(3 downto 0);
     signal CCW: std_logic_vector(3 downto 0);
+    signal UART_out: std_logic;
+    signal from_sensor: std_logic := '0';
+    signal to_sensor: std_logic;
 
     -- Array of bytes to send
     type byte_array is array (0 to 5) of std_logic_vector(7 downto 0);
@@ -45,7 +47,7 @@ architecture behavior of top_TB is
         "01011111",  -- Byte 2
         "00100011",  -- Byte 3
         "00000100",  -- Byte 4
-        "10101010"   -- Byte 5
+        "11001010"   -- Byte 5
     );  
     signal byte_index: integer := 0;
 
@@ -61,20 +63,23 @@ begin
         port map (
             clk => clk,
             UART_in => UART_in,
-            direction_temp => direction_temp,
-            speed_temp => speed_temp,
             PWM_out => PWM_out,
             CW => CW,
-            CCW => CCW
+            CCW => CCW,
+            UART_out => UART_out,
+            from_sensor => from_sensor,
+            to_sensor => to_sensor
         );
 
     -- Clock generation process
     clk_process : process
     begin
-        clk <= '0';
-        wait for clk_period / 2;
-        clk <= '1';
-        wait for clk_period / 2;
+        while true loop
+            clk <= '0';
+            wait for clk_period / 2;
+            clk <= '1';
+            wait for clk_period / 2;
+        end loop;
     end process;
 
     -- Stimulus process
@@ -104,7 +109,7 @@ begin
         end loop;
 
         -- Finish simulation
-        assert false report "End of simulation" severity note;
+        -- assert false report "End of simulation" severity note;
         wait;
     end process;
 

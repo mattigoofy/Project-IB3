@@ -28,7 +28,7 @@ architecture behavior of sensor_TB is
     signal clk: std_logic := '0';
     signal start: std_logic := '0';
     signal sensor_out: std_logic := '0';
-    signal sensor_in: std_logic;
+    signal sensor_in: std_logic := '0';
     signal dout: integer range 0 to 65536;
     signal new_data: std_logic;
 
@@ -73,7 +73,7 @@ begin
         start <= '0';
 
         -- Simulate sensor output at 40 kHz for some time
-        wait for 10 ms;  -- Wait for some time before starting the output
+        wait for 23.24 ms;  -- Wait for some time before starting the output
 
         -- Generate 40 kHz signal for sensor_out
         for i in 0 to 50 loop  -- Simulate 200 cycles (5 ms total)
@@ -83,8 +83,23 @@ begin
             wait for 12.5 us;  -- Low for 12.5 us
         end loop;
 
-        -- Finish simulation
-        wait;  -- Wait indefinitely
+        -- -- Finish simulation
+        -- wait;  -- Wait indefinitely
+
+        start <= '1';
+        wait for clk_period;  -- Hold start high for 100 ns
+        start <= '0';
+
+        -- Simulate sensor output at 40 kHz for some time
+        wait for 100 ms;  -- Wait for some time before starting the output
+
+        -- Generate 40 kHz signal for sensor_out
+        for i in 0 to 50 loop  -- Simulate 200 cycles (5 ms total)
+            sensor_out <= '1';
+            wait for 12.5 us;  -- High for 12.5 us (1/2 of 40 kHz period)
+            sensor_out <= '0';
+            wait for 12.5 us;  -- Low for 12.5 us
+        end loop;
     end process;
 
 end behavior;
