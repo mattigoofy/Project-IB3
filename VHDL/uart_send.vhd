@@ -1,5 +1,6 @@
 library IEEE;
 use IEEE.std_logic_1164.ALL;
+use IEEE.numeric_std.ALL;
 
 entity uart_send is
     generic (
@@ -18,21 +19,22 @@ end uart_send;
 architecture arch of uart_send is
 
     component clk_div is
-        generic ( n : natural := 50000);
+        generic ( n : natural);
         Port ( clk_in : in STD_LOGIC;
                clk_out : out STD_LOGIC);
     end component;
 
-    signal dbuffer: std_logic_vector(din_size downto 0);
+    signal dbuffer: std_logic_vector(din_size - 1 + 4 downto 0);
     
     type fsm_states is (READY, SENDING);
     signal state: fsm_states := READY;
 
-    signal index: integer range 0 to din_size := 0;
-    -- signal prev_start: std_logic := '0';
+    signal index: integer range 0 to din_size - 1 + 4 := 0;
     signal clk_uart: std_logic;
-
+    
 begin
+
+
     inst_div: clk_div
         generic map (n => CLOCK_FREQ/BAUD_RATE)
         port map (
@@ -47,7 +49,7 @@ begin
             case state is
                 when READY =>
                     if start = '1' then
-                        dbuffer <= din & '0';
+                        dbuffer <= '1' & din(15 downto 8) & '0' & '1' & din(7 downto 0) & '0';
                         -- dout <= '0';
                         state <= SENDING;
                     else
@@ -56,7 +58,7 @@ begin
                     end if;
 
                 when SENDING =>
-                    if index < din_size then
+                    if index < din_size - 1 + 4 then
                         -- index <= index + 1;
                     else 
                         -- index <= 0;
@@ -86,8 +88,8 @@ begin
 
                     -- prev_start <= start;
                 when SENDING =>
-                        dout <= dbuffer(index);
-                        if index < din_size then
+                    dout <= dbuffer(index);
+                        if index < din_size - 1 + 4 then
                             index <= index + 1;
                         else 
                             index <= 0;

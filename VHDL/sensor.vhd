@@ -1,5 +1,6 @@
 library IEEE;
 use IEEE.std_logic_1164.ALL;
+use IEEE.numeric_std.ALL;
 
 entity sensor is
     generic (
@@ -23,12 +24,13 @@ architecture arch of sensor is
     constant max_ticks: integer := ( max_length * (freq_clk/1000) )/331;
 
     signal start_cntr: integer range 0 to wait_for := 0;
-    signal time_cntr: integer range 0 to 65536 := 0;
+    signal time_cntr: integer range 0 to max_ticks := 0;
     signal prev_sensor_out: std_logic := '1';
 
     type fsm_states is (INIT, COUNTING);
     signal state_from: fsm_states := INIT;
     signal state_to: fsm_states := INIT;
+
 begin
 
     to_sensor: process(clk)
@@ -40,6 +42,8 @@ begin
                         start_cntr <= 0;
                         sensor_in <= '1';
                         state_to <= COUNTING;
+                    else
+                        sensor_in <= '0';
                     end if;
                 
                 when COUNTING =>
@@ -61,8 +65,8 @@ begin
                     new_data <= '0';
                     if start = '1' then
                         state_from <= COUNTING;
-                        time_cntr <= 0;
                     end if;
+                    time_cntr <= 0;
 
                 when COUNTING =>
                     if sensor_out > prev_sensor_out then      -- rising edge
@@ -74,7 +78,7 @@ begin
                             time_cntr <= time_cntr + 1;
                         else    
                             state_from <= INIT;
-                            dout <= 0;
+                            dout <= 65535;
                             new_data <= '1';
                         end if;
                         

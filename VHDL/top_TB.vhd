@@ -9,12 +9,12 @@ end tb_top;
 architecture behavior of tb_top is
     -- Component Declaration for the Unit Under Test (UUT)
     component top
-        generic (
-            baud_rate: integer := 9600;
-            clock_frequency: integer := 100000000;
-            speed_length: integer := 5;
-            direction_length: integer := 3
-        );
+        -- generic (
+        --     baud_rate: integer := 9600;
+        --     clock_frequency: integer := 100000000;
+        --     speed_length: integer := 5;
+        --     direction_length: integer := 3
+        -- );
         Port ( 
             clk: in std_logic;
             UART_in: in std_logic;
@@ -27,7 +27,7 @@ architecture behavior of tb_top is
 
     -- Constants
     constant clk_period : time := 10 ns;  -- 100 MHz clock
-    constant baud_rate_period : time := 104us;  -- 9600 bps
+    constant baud_rate_period : time := 104 us;  -- 9600 bps
 
     -- Signals for connecting to the UUT
     signal clk: std_logic := '0';
@@ -40,13 +40,13 @@ architecture behavior of tb_top is
     signal to_sensor: std_logic;
 
     -- Array of bytes to send
-    type byte_array is array (0 to 5) of std_logic_vector(7 downto 0);
+    type byte_array is array (0 to 1) of std_logic_vector(7 downto 0);
     signal bytes_to_send : byte_array := (
         "00010000",  -- Byte 0
-        "10010010",  -- Byte 1
-        "01011111",  -- Byte 2
-        "00100011",  -- Byte 3
-        "00000100",  -- Byte 4
+        -- "10010010",  -- Byte 1
+        -- "01011111",  -- Byte 2
+        -- "00100011",  -- Byte 3
+        -- "00000100",  -- Byte 4
         "11001010"   -- Byte 5
     );  
     signal byte_index: integer := 0;
@@ -54,12 +54,12 @@ architecture behavior of tb_top is
 begin
     -- Instantiate the Unit Under Test (UUT)
     uut: top
-        generic map (
-            baud_rate => 9600,
-            clock_frequency => 100000000,
-            speed_length => 5,
-            direction_length => 3
-        )
+        -- generic map (
+        --     baud_rate => 9600,
+        --     clock_frequency => 100000000,
+        --     speed_length => 5,
+        --     direction_length => 3
+        -- )
         port map (
             clk => clk,
             UART_in => UART_in,
@@ -106,6 +106,16 @@ begin
 
             -- Wait for a while to observe the output
             wait for 10 * baud_rate_period;
+        end loop;
+
+        wait for 2 ms;
+
+        
+        for i in 0 to 50 loop  -- Simulate 200 cycles (5 ms total)
+            from_sensor <= '1';
+            wait for 12.5 us;  -- High for 12.5 us (1/2 of 40 kHz period)
+            from_sensor <= '0';
+            wait for 12.5 us;  -- Low for 12.5 us
         end loop;
 
         -- Finish simulation

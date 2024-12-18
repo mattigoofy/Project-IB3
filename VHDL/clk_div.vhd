@@ -13,7 +13,7 @@ end clk_div;
 
 architecture Behavioral of clk_div is
 
-	signal s_count : natural range 0 to n;
+	signal s_count : natural range 0 to n := 0;
 	signal s_slow_clk_en : std_logic;
 
 begin

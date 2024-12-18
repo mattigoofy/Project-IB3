@@ -4,21 +4,16 @@ use IEEE.NUMERIC_STD.ALL;
 
 
 entity top is
-    generic (
-        baud_rate: integer := 9600;
-        clock_frequency: integer := 96000000;
-        speed_length: integer := 5;
-        direction_length: integer := 3
-    );
+    -- generic (
+    --     baud_rate: integer := 9600;
+    --     clock_frequency: integer := 96000000;
+    --     speed_length: integer := 5;
+    --     direction_length: integer := 3
+    -- );
     Port ( 
         clk: in std_logic;
-        -- for testing
-        -- speed: in std_logic_vector (speed_length-1 downto 0);
-        -- direction: in std_logic_vector (direction_length-1 downto 0);
         -- UART
         UART_in: in std_logic;
-        -- direction_temp: out std_logic_vector (2 downto 0);
-        -- speed_temp: out std_logic_vector (4 downto 0);
         PWM_out, CW, CCW: out std_logic_vector (3 downto 0);     -- LV, RV, LA, RA
         UART_out: out std_logic;
 
@@ -28,6 +23,11 @@ entity top is
 end top;
 
 architecture Behavioral of top is  
+
+    constant baud_rate: integer := 9600;
+    constant clock_frequency: integer := 96000000;
+    constant speed_length: integer := 5;
+    constant direction_length: integer := 3;
 
     component synchronizer
         generic(
@@ -117,27 +117,9 @@ architecture Behavioral of top is
     signal sensor_data: integer range 0 to 65536;
     signal s_sensor_data: std_logic_vector(15 downto 0);
     signal sensor_new_data: std_logic;
+    signal sync_from_sensor: std_logic;
+
 begin
-    -- synchronizers
-    -- inst_sync_speed: synchronizer
-    --     generic map (
-    --         length => speed_length
-    --     )
-    --     port map(
-    --         din => speed,
-    --         clk => clk_slow_5,
-    --         dout => sync_speed
-    --     );
-        
-    -- inst_sync_direction: synchronizer
-    --     generic map (
-    --         length => direction_length
-    --     )
-    --     port map(
-    --         din => direction,
-    --         clk => clk_slow_5,
-    --         dout => sync_direction
-    --     );
         
     inst_sync_UART: synchronizer
         generic map (
@@ -147,6 +129,16 @@ begin
             din(0) => UART_in,
             clk => clk_main,
             dout(0) => sync_UART
+        );
+
+    inst_sync_sensor: synchronizer
+        generic map (
+            length => 1
+        )
+        port map(
+            din(0) => from_sensor,
+            clk => clk_main,
+            dout(0) => sync_from_sensor
         );
 
     -- motors
@@ -239,7 +231,7 @@ begin
         port map (
             clk => clk_main,
             start => start_sensor,
-            sensor_out => from_sensor,
+            sensor_out => sync_from_sensor,
             sensor_in => to_sensor,
             dout => sensor_data,
             new_data => sensor_new_data
