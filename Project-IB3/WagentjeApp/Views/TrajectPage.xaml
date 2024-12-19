@@ -1,78 +1,88 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="WagentjeApp.Views.TrajectPage"
-             Title="Trajectbeheer">
-    <!-- Dark background color -->
+             Title="Trajectbeheer"
+             BackgroundColor="#121212">
+    <!-- Gebruik een Grid voor een vaste layout met scrollbare inhoud -->
+    <Grid RowDefinitions="*,Auto">
+        <!-- Scrollbare inhoud -->
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="20" Spacing="15">
+                <!-- Titel -->
+                <Label Text="Trajectbeheer" FontSize="Large" HorizontalOptions="Center" TextColor="#FFFFFF" />
 
-    <StackLayout Padding="10">
-        <Label Text="Trajectnaam" TextColor="#FFFFFF" />
-        <!-- White text color -->
-        <Entry x:Name="TrajectNameEntry" Placeholder="Naam van het traject" 
-               TextColor="#FFFFFF" PlaceholderColor="#A0A0A0" />
+                <!-- Trajectnaam invoer -->
+                <Label Text="Trajectnaam" TextColor="#FFFFFF" />
+                <Entry x:Name="TrajectNameEntry" Placeholder="Naam van het traject" 
+                       TextColor="#FFFFFF" PlaceholderColor="#A0A0A0" />
 
-        <Label Text="Voeg een commando toe:" />
-        <Picker x:Name="CommandPicker" Title="Selecteer een commando" />
-        <Picker.ItemsSource>
-            <x:Array Type="{x:Type x:String}">
-                <x:String>Vooruit</x:String>
-                <x:String>Achteruit</x:String>
-                <x:String>Links</x:String>
-                <x:String>Rechts</x:String>
-                <x:String>Links_draaien</x:String>
-                <x:String>Rechts_draaien</x:String>
-            </x:Array>
-        </Picker.ItemsSource>
+                <!-- Commando toevoegen -->
+                <Label Text="Voeg een commando toe:" TextColor="#FFFFFF" />
+                <Picker x:Name="CommandPicker" Title="Selecteer een commando">
+                    <Picker.ItemsSource>
+                        <x:Array Type="{x:Type x:String}">
+                            <x:String>Vooruit</x:String>
+                            <x:String>Achteruit</x:String>
+                            <x:String>Links</x:String>
+                            <x:String>Rechts</x:String>
+                            <x:String>Links_draaien</x:String>
+                            <x:String>Rechts_draaien</x:String>
+                        </x:Array>
+                    </Picker.ItemsSource>
+                </Picker>
 
+                <!-- Duur invoer -->
+                <Label Text="Duur (seconden)" TextColor="#FFFFFF" />
+                <Entry x:Name="DurationEntry" Placeholder="Duur (seconden)" 
+                       Keyboard="Numeric" TextColor="#FFFFFF" PlaceholderColor="#A0A0A0" />
 
-        <Label Text="Duur (seconden)" />
-        <Entry x:Name="DurationEntry" Placeholder="Duur (seconden)" 
-               Keyboard="Numeric" />
-        <!-- Slider -->
-        <Slider x:Name="ValueSlider"
-             Minimum="0"
-             Maximum="100"
-             Value="50"
-             ValueChanged="OnSliderValueChanged" />
+                <!-- Slider voor waarde -->
+                <Label Text="Pas waarde aan:" TextColor="#FFFFFF" />
+                <Slider x:Name="ValueSlider"
+                        Minimum="0"
+                        Maximum="100"
+                        Value="50"
+                        ValueChanged="OnSliderValueChanged" />
+                <Label x:Name="SliderValueLabel" Text="50" HorizontalOptions="Center" TextColor="#FFFFFF" />
 
-        <!-- Label to display the slider's value -->
-        <Label x:Name="SliderValueLabel"
-            Text="50"
-            HorizontalOptions="Center" />
+                <!-- Commando toevoegen knop -->
+                <Button Text="Voeg Commando Toe" Clicked="OnAddCommandButtonClicked" BackgroundColor="#1E88E5" TextColor="#FFFFFF" />
 
-        <Button Text="Voeg Commando Toe" Clicked="OnAddCommandButtonClicked" />
-        <!-- Darker button -->
+                <!-- Lijst van huidige commando's -->
+                <Label Text="Huidige Commando's:" TextColor="#FFFFFF" />
+                <ListView x:Name="CommandsListView" SeparatorVisibility="None">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <ViewCell>
+                                <HorizontalStackLayout Spacing="10" Padding="5">
+                                    <Label Text="{Binding}" VerticalOptions="Center" TextColor="#FFFFFF" />
+                                    <Button Text="Verwijder" BackgroundColor="#FF3B30" TextColor="#FFFFFF" 
+                                            Clicked="OnDeleteCommandButtonClicked" CommandParameter="{Binding}" />
+                                </HorizontalStackLayout>
+                            </ViewCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
 
-        <Label Text="Huidige Commando's:"  />
-        <!--<ListView x:Name="CommandsListView" />-->
-        <ListView x:Name="CommandsListView" SeparatorVisibility="None">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <ViewCell>
-                        <StackLayout Orientation="Horizontal" Padding="5">
-                            <Label Text="{Binding}" VerticalOptions="Center" TextColor="#FFFFFF" />
-                            <Button Text="Delete" BackgroundColor="#FF3B30" TextColor="#FFFFFF" 
-                            Clicked="OnDeleteCommandButtonClicked" CommandParameter="{Binding}" />
-                        </StackLayout>
-                    </ViewCell>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+                <!-- Opslaan traject knop -->
+                <Button Text="Opslaan Traject" Clicked="OnSaveTrajectButtonClicked" BackgroundColor="#4CAF50" TextColor="#FFFFFF" Margin="0,10,0,0" />
 
-        <Button Text="Opslaan Traject" Clicked="OnSaveTrajectButtonClicked" 
-                TextColor="#FFFFFF" />
-        <Button Text="Verwijder Geselecteerd Traject" Clicked="OnDeleteTrajectButtonClicked" 
-                BackgroundColor="#FF3B30" TextColor="#FFFFFF" />
-        <!-- Red button -->
-
-        <Label Text="Opgeslagen Trajecten:"  />
-        <ListView x:Name="SavedTrajectsListView" SelectionMode="Single"  />
-
-        <!--<Button Text="Voer Geselecteerd Traject Uit" Clicked="OnExecuteTrajectButtonClicked" 
-                BackgroundColor="#1E1E1E" TextColor="#FFFFFF" />-->
-        <HorizontalStackLayout Spacing="10" Padding="5">
-            <Button Text="Voer Geselecteerd Traject Uit" Clicked="OnExecuteTrajectButtonClicked"/>
-            <Button Text="Edit Geselecteerd Traject" Clicked="OnEditTrajectButtonClicked" />
-             <!--Blue button for edit--> 
-        </HorizontalStackLayout>
-    </StackLayout>
+                <!-- Lijst van opgeslagen trajecten -->
+                <Label Text="Opgeslagen Trajecten:" TextColor="#FFFFFF" />
+                <ListView x:Name="SavedTrajectsListView" SelectionMode="Single">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <ViewCell>
+                                <Label Text="{Binding}" TextColor="#FFFFFF" VerticalOptions="Center" />
+                            </ViewCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <!-- Verwijder geselecteerd traject knop -->
+                <Button Text="Verwijder Geselecteerd Traject" Clicked="OnDeleteTrajectButtonClicked" BackgroundColor="#FF3B30" TextColor="#FFFFFF" Margin="0,10,0,0" />
+                <Button Text="Bewerk Geselecteerd Traject" Clicked="OnEditTrajectButtonClicked" BackgroundColor="#FFC107" TextColor="#FFFFFF" />
+                <Button Text="Voer Geselecteerd Traject Uit" Clicked="OnExecuteTrajectButtonClicked" BackgroundColor="#1E88E5" TextColor="#FFFFFF" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 </ContentPage>
