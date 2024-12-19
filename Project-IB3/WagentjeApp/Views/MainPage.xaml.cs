@@ -8,6 +8,7 @@ namespace WagentjeApp.Views
         public MainPage()
         {
             InitializeComponent();
+            Application.Current.UserAppTheme = AppTheme.Dark;
         }
 
         private async void OnCreateTrajectClicked(object sender, EventArgs e)

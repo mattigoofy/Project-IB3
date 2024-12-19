@@ -8,7 +8,8 @@ namespace WagentjeApp.Views
         public SettingsPage()
         {
             InitializeComponent(); 
-            MqttIpEntry.Text = MqttService.Instance.GetIpAddress(); 
+            MqttIpEntry.Text = MqttService.Instance.GetIpAddress();
+            Application.Current.UserAppTheme = AppTheme.Dark;
         }
 
         private void OnSaveButtonClicked(object sender, EventArgs e)

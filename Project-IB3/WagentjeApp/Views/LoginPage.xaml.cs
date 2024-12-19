@@ -10,6 +10,7 @@ namespace WagentjeApp.Views
         public LoginPage()
         {
             InitializeComponent();
+            Application.Current.UserAppTheme = AppTheme.Dark;
         }
 
         private async void OnLoginButtonClicked(object sender, EventArgs e)

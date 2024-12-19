@@ -18,6 +18,8 @@ namespace WagentjeApp.Views
         public TrajectPage()
         {
             InitializeComponent();
+            Application.Current.UserAppTheme = AppTheme.Dark;
+
             _commands = new List<string>(); // Initialiseer commandolijst
             _savedTrajects = new List<Traject>(); // Initialiseer opgeslagen trajectenlijst
             CommandsListView.ItemsSource = _commands;

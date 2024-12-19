@@ -1,8 +1,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="WagentjeApp.Views.TrajectPage"
-             Title="Trajectbeheer"
-             BackgroundColor="#121212">
+             Title="Trajectbeheer">
     <!-- Dark background color -->
 
     <StackLayout Padding="10">
@@ -11,24 +10,23 @@
         <Entry x:Name="TrajectNameEntry" Placeholder="Naam van het traject" 
                TextColor="#FFFFFF" PlaceholderColor="#A0A0A0" />
 
-        <Label Text="Voeg een commando toe:" TextColor="#FFFFFF" />
-        <Picker x:Name="CommandPicker" Title="Selecteer een commando" 
-                TextColor="#FFFFFF">
-            <Picker.ItemsSource>
-                <x:Array Type="{x:Type x:String}">
-                    <x:String>Vooruit</x:String>
-                    <x:String>Achteruit</x:String>
-                    <x:String>Links</x:String>
-                    <x:String>Rechts</x:String>
-                    <x:String>Links_draaien</x:String>
-                    <x:String>Rechts_draaien</x:String>
-                </x:Array>
-            </Picker.ItemsSource>
-        </Picker>
+        <Label Text="Voeg een commando toe:" />
+        <Picker x:Name="CommandPicker" Title="Selecteer een commando" />
+        <Picker.ItemsSource>
+            <x:Array Type="{x:Type x:String}">
+                <x:String>Vooruit</x:String>
+                <x:String>Achteruit</x:String>
+                <x:String>Links</x:String>
+                <x:String>Rechts</x:String>
+                <x:String>Links_draaien</x:String>
+                <x:String>Rechts_draaien</x:String>
+            </x:Array>
+        </Picker.ItemsSource>
 
-        <Label Text="Duur (seconden)" TextColor="#FFFFFF" />
+
+        <Label Text="Duur (seconden)" />
         <Entry x:Name="DurationEntry" Placeholder="Duur (seconden)" 
-               Keyboard="Numeric" TextColor="#FFFFFF" PlaceholderColor="#A0A0A0" />
+               Keyboard="Numeric" />
         <!-- Slider -->
         <Slider x:Name="ValueSlider"
              Minimum="0"
@@ -41,11 +39,10 @@
             Text="50"
             HorizontalOptions="Center" />
 
-        <Button Text="Voeg Commando Toe" Clicked="OnAddCommandButtonClicked" 
-                BackgroundColor="#1E1E1E" TextColor="#FFFFFF" />
+        <Button Text="Voeg Commando Toe" Clicked="OnAddCommandButtonClicked" />
         <!-- Darker button -->
 
-        <Label Text="Huidige Commando's:" TextColor="#FFFFFF" />
+        <Label Text="Huidige Commando's:"  />
         <!--<ListView x:Name="CommandsListView" />-->
         <ListView x:Name="CommandsListView" SeparatorVisibility="None">
             <ListView.ItemTemplate>
@@ -62,21 +59,19 @@
         </ListView>
 
         <Button Text="Opslaan Traject" Clicked="OnSaveTrajectButtonClicked" 
-                BackgroundColor="#1E1E1E" TextColor="#FFFFFF" />
+                TextColor="#FFFFFF" />
         <Button Text="Verwijder Geselecteerd Traject" Clicked="OnDeleteTrajectButtonClicked" 
                 BackgroundColor="#FF3B30" TextColor="#FFFFFF" />
         <!-- Red button -->
 
-        <Label Text="Opgeslagen Trajecten:" TextColor="#FFFFFF" />
-        <ListView x:Name="SavedTrajectsListView" SelectionMode="Single" />
+        <Label Text="Opgeslagen Trajecten:"  />
+        <ListView x:Name="SavedTrajectsListView" SelectionMode="Single"  />
 
         <!--<Button Text="Voer Geselecteerd Traject Uit" Clicked="OnExecuteTrajectButtonClicked" 
                 BackgroundColor="#1E1E1E" TextColor="#FFFFFF" />-->
         <HorizontalStackLayout Spacing="10" Padding="5">
-            <Button Text="Voer Geselecteerd Traject Uit" Clicked="OnExecuteTrajectButtonClicked" 
-                BackgroundColor="#1E1E1E" TextColor="#FFFFFF" />
-            <Button Text="Edit Geselecteerd Traject" Clicked="OnEditTrajectButtonClicked" 
-                BackgroundColor="#007AFF" TextColor="#FFFFFF" />
+            <Button Text="Voer Geselecteerd Traject Uit" Clicked="OnExecuteTrajectButtonClicked"/>
+            <Button Text="Edit Geselecteerd Traject" Clicked="OnEditTrajectButtonClicked" />
              <!--Blue button for edit--> 
         </HorizontalStackLayout>
     </StackLayout>

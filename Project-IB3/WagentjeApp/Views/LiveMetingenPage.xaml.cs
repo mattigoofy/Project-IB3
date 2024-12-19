@@ -16,6 +16,7 @@ namespace WagentjeApp.Views
         public LiveMetingenPage()
         {
             InitializeComponent();
+            Application.Current.UserAppTheme = AppTheme.Dark;
 
             _measurements = new ObservableCollection<Measurement>();
 

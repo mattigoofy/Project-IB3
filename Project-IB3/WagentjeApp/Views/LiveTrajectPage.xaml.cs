@@ -15,6 +15,8 @@ namespace WagentjeApp.Views
         public LiveTrajectPage()
         {
             InitializeComponent();
+            Application.Current.UserAppTheme = AppTheme.Dark;
+
             _commandTimer = new System.Timers.Timer(precision * 1000); // Interval in milliseconden
             _commandTimer.Elapsed += OnTimerElapsed;
         }

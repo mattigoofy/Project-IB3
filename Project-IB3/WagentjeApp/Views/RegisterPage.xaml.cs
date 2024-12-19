@@ -10,6 +10,7 @@ namespace WagentjeApp.Views
         public RegisterPage()
         {
             InitializeComponent();
+            Application.Current.UserAppTheme = AppTheme.Dark;
         }
 
         private async void OnRegisterButtonClicked(object sender, EventArgs e)

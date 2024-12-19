@@ -18,7 +18,7 @@ entity sensor is
         new_data: out std_logic
     ) ;
 end sensor;
-
+    
 architecture arch of sensor is
     constant wait_for: integer := ammount_of_pulses * freq_clk / freq_sens;
     constant max_ticks: integer := ( max_length * (freq_clk/1000) )/331;

@@ -10,6 +10,8 @@ namespace WagentjeApp.Views
         public ManueleMetingenPage()
         {
             InitializeComponent();
+            Application.Current.UserAppTheme = AppTheme.Dark;
+
             manualMeasurements = new ObservableCollection<string>();
             ManualMeasurementsListView.ItemsSource = manualMeasurements;
         }

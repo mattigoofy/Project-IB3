@@ -4,7 +4,7 @@ import getopt
 
 BAUD_RATE = 9600
 # PORT = "/dev/ttyS0"
-PORT = "COM12"
+PORT = "COM7"
 
 def UART_send(data_binary):
     # try:

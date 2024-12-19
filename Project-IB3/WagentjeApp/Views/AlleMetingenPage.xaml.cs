@@ -10,6 +10,7 @@ public partial class AlleMetingenPage : ContentPage
     public AlleMetingenPage()
     {
         InitializeComponent();
+        Application.Current.UserAppTheme = AppTheme.Dark;
 
         DateTime startTimestamp = new DateTime(2024, 1, 1, 0, 0, 0);
         DateTime endTimestamp = new DateTime(2025, 12, 31, 0, 0, 0);

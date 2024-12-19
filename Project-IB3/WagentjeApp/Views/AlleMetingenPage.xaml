@@ -31,6 +31,8 @@
         <StackLayout Orientation="Horizontal" Spacing="10" HorizontalOptions="Center">
             <Label Text="Min Value:" FontSize="16" VerticalTextAlignment="Center" />
             <Entry x:Name="MinValueEntry" Keyboard="Numeric" Placeholder="Minimum" />
+        </StackLayout>
+        <StackLayout Orientation="Horizontal" Spacing="10" HorizontalOptions="Center">
             <Label Text="Max Value:" FontSize="16" VerticalTextAlignment="Center" />
             <Entry x:Name="MaxValueEntry" Keyboard="Numeric" Placeholder="Maximum" />
         </StackLayout>
