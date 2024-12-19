@@ -18,9 +18,8 @@
             <!-- Leeg veld linksboven -->
             <Label Grid.Row="0" Grid.Column="0" />
 
-            <!-- Vooruit knop met pijl omhoog -->
-            <Button Text="⬆" 
-                    FontSize="32" 
+            <!-- Vooruit knop met afbeelding -->
+            <Button ImageSource="up_arrow.png" 
                     Pressed="OnForwardPressed" 
                     Released="OnButtonReleased"
                     Grid.Row="0" 
@@ -29,49 +28,49 @@
             <!-- Leeg veld rechtsboven -->
             <Label Grid.Row="0" Grid.Column="2" />
 
-            <!-- Links knop met pijl naar links -->
-            <Button Text="⬅" 
-                    FontSize="32" 
+            <!-- Links knop met afbeelding -->
+            <Button ImageSource="left_arrow.png" 
                     Pressed="OnLeftPressed" 
                     Released="OnButtonReleased"
                     Grid.Row="1" 
                     Grid.Column="0" />
 
-            <!-- Achteruit knop met pijl omlaag -->
-            <Button Text="⬇" 
-                    FontSize="32" 
+            <!-- Achteruit knop met afbeelding -->
+            <Button ImageSource="down_arrow.png" 
                     Pressed="OnBackwardPressed" 
                     Released="OnButtonReleased"
                     Grid.Row="3" 
                     Grid.Column="1" />
 
-            <!-- Rechts knop met pijl naar rechts -->
-            <Button Text="⮕" 
-                    FontSize="32" 
+            <!-- Rechts knop met afbeelding -->
+            <Button ImageSource="right_arrow.png" 
                     Pressed="OnRightPressed" 
                     Released="OnButtonReleased"
                     Grid.Row="1" 
                     Grid.Column="2" />
 
-            <!-- Draai links -->
-            <Button Text="⭯" 
-                    FontSize="32" 
+            <!-- Draai links knop met afbeelding -->
+            <Button ImageSource="turn_left.png" 
                     Pressed="OnTurnLeftPressed" 
                     Released="OnButtonReleased"
                     Grid.Row="4" 
                     Grid.Column="0" />
-            
+
             <!-- Leeg veld ondermidden -->
             <Label Grid.Row="4" Grid.Column="1" />
 
-            <!-- Draai rechts -->
-            <Button Text="⭮" 
-                    FontSize="32" 
+            <!-- Draai rechts knop met afbeelding -->
+            <Button ImageSource="turn_right.png" 
                     Pressed="OnTurnRightPressed" 
                     Released="OnButtonReleased"
                     Grid.Row="4" 
                     Grid.Column="2" />
         </Grid>
+
+        <Label Text="Snelheid"
+         FontSize="20"
+         HorizontalOptions="Center"
+         Margin="0,0,0,20" />
 
         <!-- Slider -->
         <Slider x:Name="ValueSlider"
@@ -85,7 +84,4 @@
                Text="50"
                HorizontalOptions="Center" />
     </StackLayout>
-    <!--<VerticalStackLayout Padding="20" Spacing="10">
-
-    </VerticalStackLayout>-->
 </ContentPage>
