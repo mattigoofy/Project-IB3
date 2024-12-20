@@ -87,7 +87,7 @@ namespace WagentjeApp.Views
                     if (parts.Length == 3 && double.TryParse(parts[1].Replace(" seconden", ""), out double duration))
                     {
                         string actionName = parts[0];
-                        string speed = parts[2];
+                        string speed = parts[2].Replace("%", "");
                         TrajectNameEntry.Text = string.Empty;
                         return new TrajectCommand(actionName, duration, actionName, Int32.Parse(speed) );
                     }
@@ -179,7 +179,7 @@ namespace WagentjeApp.Views
                     _commands.Clear();
                     foreach (var command in traject.Commands)
                     {
-                        _commands.Add($"{command.Action} - {command.Duration} seconden");
+                        _commands.Add($"{command.Action} - {command.Duration} seconden - {command.Speed}%");
                     }
 
                     CommandsListView.ItemsSource = null;

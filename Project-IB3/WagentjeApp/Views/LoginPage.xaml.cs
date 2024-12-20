@@ -15,6 +15,7 @@ namespace WagentjeApp.Views
 
         private async void OnLoginButtonClicked(object sender, EventArgs e)
         {
+            //Application.Current.MainPage = new NavigationPage(new TrajectPage());
             string username = UsernameEntry.Text;
             string password = PasswordEntry.Text;
 
