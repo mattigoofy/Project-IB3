@@ -293,7 +293,6 @@ namespace WagentjeApp.Services
         // Method for loading measurements
         public async Task<List<Measurement>> LoadMeasurementsAsync(DateTime startTimestamp, DateTime endTimestamp, int startValue, int endValue)
         {
-            //var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new { UserId = userId });
             var payload = Newtonsoft.Json.JsonConvert.SerializeObject(new { startTimestamp = startTimestamp,
                                                                             endTimestamp = endTimestamp,        
                                                                             startValue = startValue,
@@ -369,14 +368,5 @@ namespace WagentjeApp.Services
             _mqttServerIp = ipAddress;
             InitializeMqttOptions(); // Update the MQTT options with the new IP address
         }
-
-        // Dummy Measurement class (replace with actual implementation)
-        //public class Measurement
-        //{
-        //    public int Value { get; set; }
-        //}
     }
-
-
-
 }

@@ -24,10 +24,8 @@ public partial class AlleMetingenPage : ContentPage
             var currentUser = MqttService.Instance.GetCurrentUser();
             int userId = currentUser.UserId;
 
-            // Fetch measurements from the service
             var savedMeasurementsFromService = await MqttService.Instance.LoadMeasurementsAsync(startTimestamp, endTimestamp, startValue, endValue);
 
-            // Map the fetched data to the Measurement model
             _measurements = savedMeasurementsFromService.Select(t => new Measurement
             {
                 Id = t.Id,
@@ -35,7 +33,6 @@ public partial class AlleMetingenPage : ContentPage
                 Timestamp = t.Timestamp
             }).ToList();
 
-            // Bind the data to the ListView
             MeasurementsListView.ItemsSource = _measurements;
         }
         catch (Exception ex)
@@ -61,8 +58,6 @@ public partial class AlleMetingenPage : ContentPage
     {
         DateTime startTimestamp = new DateTime(2024, 1, 1, 0, 0, 0);
         DateTime endTimestamp = new DateTime(2025, 12, 31, 0, 0, 0);
-        //LoadMeasurements(startTimestamp, endTimestamp, 0, 2 ^ (sizeof(int) * 8) - 1);
-        //LoadMeasurements(startTimestamp, endTimestamp, 0, ( 2 << (sizeof(int) * 8) ) - 1);
         LoadMeasurements(startTimestamp, endTimestamp, 0, int.MaxValue);
     }
 }

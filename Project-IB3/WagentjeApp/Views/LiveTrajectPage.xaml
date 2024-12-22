@@ -79,7 +79,7 @@
                 Value="50"
                 ValueChanged="OnSliderValueChanged" />
 
-        <!-- Label to display the slider's value -->
+        <!-- slider value -->
         <Label x:Name="SliderValueLabel"
                Text="50"
                HorizontalOptions="Center" />

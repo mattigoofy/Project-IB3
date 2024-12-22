@@ -10,7 +10,7 @@
                HorizontalOptions="Center"
                Padding="10"/>
 
-        <!-- Header Row for the Table -->
+        <!-- Header table -->
         <Grid ColumnDefinitions="*,*,*"
               Padding="10"
               VerticalOptions="Start">
@@ -19,12 +19,11 @@
             <Label Text="Timestamp" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" Grid.Column="2" />
         </Grid>
 
-        <!-- ListView to Display Measurements -->
+        <!-- measurements -->
         <ListView x:Name="MeasurementsListView" SelectionMode="None" SeparatorVisibility="None">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <ViewCell>
-                        <!-- Row in the Table -->
                         <Grid ColumnDefinitions="*,*,*" Padding="10">
                             <Label Text="{Binding Id}" FontSize="14" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
                             <Label Text="{Binding Value}" FontSize="14" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" Grid.Column="1" />

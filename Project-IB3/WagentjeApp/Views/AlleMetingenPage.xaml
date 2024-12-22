@@ -10,7 +10,7 @@
                HorizontalOptions="Center"
                Padding="10" />
 
-        <!-- Time Inputs -->
+        <!-- time Inputs -->
         <StackLayout Orientation="Horizontal" Spacing="10" HorizontalOptions="Center">
             <Label Text="Start Timestamp:" FontSize="16" VerticalTextAlignment="Center" />
             <DatePicker x:Name="StartDatePicker"
@@ -27,7 +27,7 @@
             <TimePicker x:Name="EndTimePicker" Format="HH:mm" />
         </StackLayout>
 
-        <!-- Number Inputs -->
+        <!-- number Inputs -->
         <StackLayout Orientation="Horizontal" Spacing="10" HorizontalOptions="Center">
             <Label Text="Min Value:" FontSize="16" VerticalTextAlignment="Center" />
             <Entry x:Name="MinValueEntry" Keyboard="Numeric" Placeholder="Minimum" />
@@ -42,7 +42,7 @@
         <Button Text="Reset"
                 Clicked="OnResetClicked" />
 
-        <!-- Header Row for the Table -->
+        <!-- headers for table -->
         <Grid ColumnDefinitions="*,*,*"
               Padding="10"
               VerticalOptions="Start">
@@ -51,12 +51,11 @@
             <Label Text="Timestamp" FontSize="16" FontAttributes="Bold" HorizontalTextAlignment="Center" Grid.Column="2" />
         </Grid>
 
-        <!-- ListView to Display Measurements -->
+        <!-- measurements table -->
         <ListView x:Name="MeasurementsListView" SelectionMode="Single" SeparatorVisibility="None" RowHeight="50">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <ViewCell>
-                        <!-- Row in the Table -->
                         <Grid ColumnDefinitions="*,*,*" Padding="10" VerticalOptions="CenterAndExpand">
                             <Label Text="{Binding Id}" FontSize="14" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
                             <Label Text="{Binding Value}" FontSize="14" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" Grid.Column="1" />

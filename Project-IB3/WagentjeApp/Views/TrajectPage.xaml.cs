@@ -65,8 +65,7 @@ namespace WagentjeApp.Views
 
         private void OnSliderValueChanged(object sender, ValueChangedEventArgs e)
         {
-            // Update the label with the current slider value
-            SliderValueLabel.Text = $"{e.NewValue:F0}"; // Display as a whole number
+            SliderValueLabel.Text = $"{e.NewValue:F0}";
             moveSpeed = (int)e.NewValue;
         }
 
@@ -174,7 +173,6 @@ namespace WagentjeApp.Views
 
                 if (traject != null)
                 {
-                    // Prefill the trajectory name and commands for editing
                     TrajectNameEntry.Text = traject.Name;
                     _commands.Clear();
                     foreach (var command in traject.Commands)
