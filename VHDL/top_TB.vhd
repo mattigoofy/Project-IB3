@@ -25,13 +25,12 @@ architecture behavior of tb_top is
         );
     end component;
 
-    -- Constants
-    constant clk_period : time := 10 ns;  -- 100 MHz clock
-    constant baud_rate_period : time := 104 us;  -- 9600 bps
+    constant clk_period : time := 10 ns;  -- 100 MHz 
+    constant baud_rate_period : time := 104 us;  -- 9600 
 
-    -- Signals for connecting to the UUT
+
     signal clk: std_logic := '0';
-    signal UART_in: std_logic := '1';  -- idle state for UART
+    signal UART_in: std_logic := '1';
     signal PWM_out: std_logic_vector(3 downto 0);
     signal CW: std_logic_vector(3 downto 0);
     signal CCW: std_logic_vector(3 downto 0);
@@ -39,7 +38,6 @@ architecture behavior of tb_top is
     signal from_sensor: std_logic := '0';
     signal to_sensor: std_logic;
 
-    -- Array of bytes to send
     type byte_array is array (0 to 1) of std_logic_vector(7 downto 0);
     signal bytes_to_send : byte_array := (
         "00010000",  -- Byte 0
@@ -52,14 +50,7 @@ architecture behavior of tb_top is
     signal byte_index: integer := 0;
 
 begin
-    -- Instantiate the Unit Under Test (UUT)
     uut: top
-        -- generic map (
-        --     baud_rate => 9600,
-        --     clock_frequency => 100000000,
-        --     speed_length => 5,
-        --     direction_length => 3
-        -- )
         port map (
             clk => clk,
             UART_in => UART_in,
@@ -71,7 +62,6 @@ begin
             to_sensor => to_sensor
         );
 
-    -- Clock generation process
     clk_process : process
     begin
         while true loop
@@ -82,44 +72,35 @@ begin
         end loop;
     end process;
 
-    -- Stimulus process
     stim_process: process
     begin
-        -- Wait for the initial state
         wait for 1 * baud_rate_period;
 
-        -- Loop through each byte in the array
         for byte_index in 0 to bytes_to_send'length - 1 loop
-            -- Simulate sending a start bit (0)
             UART_in <= '0';  -- Start bit
             wait for baud_rate_period;
 
-            -- Send each bit of the byte
             for bit_index in 0 to 7 loop
-                UART_in <= bytes_to_send(byte_index)(bit_index);  -- Send each bit
+                UART_in <= bytes_to_send(byte_index)(bit_index);
                 wait for baud_rate_period;
             end loop;
 
-            -- Simulate sending an end bit (1)
             UART_in <= '1';  -- End bit
             wait for baud_rate_period;
 
-            -- Wait for a while to observe the output
             wait for 10 * baud_rate_period;
         end loop;
 
         wait for 2 ms;
 
         
-        for i in 0 to 50 loop  -- Simulate 200 cycles (5 ms total)
+        for i in 0 to 50 loop 
             from_sensor <= '1';
-            wait for 12.5 us;  -- High for 12.5 us (1/2 of 40 kHz period)
+            wait for 12.5 us; 
             from_sensor <= '0';
-            wait for 12.5 us;  -- Low for 12.5 us
+            wait for 12.5 us;
         end loop;
 
-        -- Finish simulation
-        -- assert false report "End of simulation" severity note;
         wait;
     end process;
 

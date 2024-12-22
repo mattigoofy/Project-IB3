@@ -41,9 +41,6 @@ begin
             dout => t_dout
         );
 
-
-    -- t_din <= x"95";
-
     process
     begin
         t_clk <= '1';

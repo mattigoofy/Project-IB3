@@ -8,7 +8,6 @@ entity motor_TB is
         T_fast: time := 10ns;
         din_length: integer := 4
     );
---  Port ( );
 end motor_TB;
 
 architecture Behavioral of motor_TB is
@@ -40,10 +39,6 @@ begin
             CW => t_CW,
             CCW => t_CCW
         );
-
-
-    -- t_speed <= b"1000";
-    -- t_direction <= '1';
 
     process
     begin

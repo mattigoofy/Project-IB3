@@ -44,26 +44,5 @@ begin
 
     CW <= direction;
     CCW <= not direction;
-    
-    -- process(clk)
-    -- begin
-    --     if(rising_edge(clk)) then
-    --         if(direction /= prev_direction) then
-    --             cntr <= 0;
-    --         else
-    --             cntr <= cntr;
-    --             CW <= prev_direction;
-    --             CCW <= not prev_direction;
-    --         end if;
-
-    --         if(cntr < 3) then
-    --             cntr <= cntr + 1;
-    --         else            -- hier 4 cylces gepaseeerd -> juiste PWM op output
-    --             CW <= direction;
-    --             CCW <= not direction;
-    --         end if;
-
-    --     end if;
-    -- end process;
 
 end Behavioral;

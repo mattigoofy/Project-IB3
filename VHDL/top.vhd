@@ -4,12 +4,6 @@ use IEEE.NUMERIC_STD.ALL;
 
 
 entity top is
-    -- generic (
-    --     baud_rate: integer := 9600;
-    --     clock_frequency: integer := 96000000;
-    --     speed_length: integer := 5;
-    --     direction_length: integer := 3
-    -- );
     Port ( 
         clk: in std_logic;
         -- UART
@@ -191,15 +185,6 @@ begin
 
     inst_MMCM : clk_wiz_0
         port map ( 
-            -- -- Clock out ports  
-            -- clk_main => clk_100M,
-            -- clk2_slow => clk_main,
-            -- clk2_fast => clk_slow_5,
-            -- -- Status and control signals                
-            -- -- reset => '1',
-            -- locked => open,
-            -- -- Clock in ports
-            -- clk_in1 => clk
             clk_main => clk_main,
             clk_motors_slow => clk_motors_main,
             clk_motors_fast => clk_motors_slow_5,
@@ -293,8 +278,5 @@ begin
     end process;
 
     s_sensor_data <= std_logic_vector(to_unsigned(sensor_data, 16));
-
-    -- direction_temp <= direction;
-    -- speed_temp <= speed;
 
 end Behavioral;

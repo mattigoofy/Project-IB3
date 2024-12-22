@@ -29,7 +29,6 @@ begin
             temp_prcnt <= std_logic_vector(resize(shift_left(unsigned(leading_zeros & din), clk_times_faster_log2), size_din+clk_times_faster_log2));
             prcnt_vector <= std_logic_vector(shift_right(unsigned(temp_prcnt), size_din));
             prcnt <= to_integer(unsigned(prcnt_vector));
-            -- out_buffer <= (prcnt downto 0 => '1', others => '0');
             out_buffer <= (others => '0');
             out_buffer(prcnt downto 0) <= (others => '1');
         end if;

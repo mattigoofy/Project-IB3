@@ -50,22 +50,16 @@ begin
                 when READY =>
                     if start = '1' then
                         dbuffer <= '1' & din(15 downto 8) & '0' & '1' & din(7 downto 0) & '0';
-                        -- dout <= '0';
                         state <= SENDING;
                     else
-                        -- dout <= '1';
                         dbuffer <= dbuffer;
                     end if;
 
                 when SENDING =>
                     if index < din_size - 1 + 4 then
-                        -- index <= index + 1;
                     else 
-                        -- index <= 0;
                         state <= READY;
-                        -- dout <= '1';
                     end if;
-                    -- dout <= dbuffer(index);
                 
                 when others =>
                     state <= state;
@@ -82,18 +76,12 @@ begin
                     index <= 0;
                     dout <= '1';
 
-                    -- if prev_start = '1' then
-                    --     dout <= '0';
-                    -- end if;
-
-                    -- prev_start <= start;
                 when SENDING =>
                     dout <= dbuffer(index);
                         if index < din_size - 1 + 4 then
                             index <= index + 1;
                         else 
                             index <= 0;
-                            -- state <= READY;
                             dout <= '1';
                         end if;
                 when others =>

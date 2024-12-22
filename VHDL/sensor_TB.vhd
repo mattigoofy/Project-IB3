@@ -7,7 +7,6 @@ end sensor_TB;
 
 architecture behavior of sensor_TB is
 
-    -- Component declaration for the sensor
     component sensor
         generic (
             freq_sens: integer := 40000;
@@ -24,7 +23,6 @@ architecture behavior of sensor_TB is
         );
     end component;
 
-    -- Testbench signals
     signal clk: std_logic := '0';
     signal start: std_logic := '0';
     signal sensor_out: std_logic := '0';
@@ -32,12 +30,9 @@ architecture behavior of sensor_TB is
     signal dout: integer range 0 to 65536;
     signal new_data: std_logic;
 
-    -- Clock period definition
     constant clk_period: time := 10 ns;  -- 100 MHz clock
 
 begin
-
-    -- Instantiate the sensor
     uut: sensor
         generic map (
             freq_sens => 40000,
@@ -53,7 +48,6 @@ begin
             new_data => new_data
         );
 
-    -- Clock generation process
     clk_process: process
     begin
         while true loop
@@ -64,41 +58,35 @@ begin
         end loop;
     end process;
 
-    -- Stimulus process
     stimulus_process: process
     begin
-        -- Start the sensor
         start <= '1';
-        wait for clk_period;  -- Hold start high for 100 ns
+        wait for clk_period; 
         start <= '0';
 
-        -- Simulate sensor output at 40 kHz for some time
-        wait for 23.24 ms;  -- Wait for some time before starting the output
 
-        -- Generate 40 kHz signal for sensor_out
-        for i in 0 to 50 loop  -- Simulate 200 cycles (5 ms total)
+        wait for 23.24 ms; 
+
+        -- 40 kHz signal
+        for i in 0 to 50 loop
             sensor_out <= '1';
-            wait for 12.5 us;  -- High for 12.5 us (1/2 of 40 kHz period)
+            wait for 12.5 us;
             sensor_out <= '0';
-            wait for 12.5 us;  -- Low for 12.5 us
+            wait for 12.5 us;
         end loop;
-
-        -- -- Finish simulation
-        -- wait;  -- Wait indefinitely
-
+        
         start <= '1';
-        wait for clk_period;  -- Hold start high for 100 ns
+        wait for clk_period;
         start <= '0';
 
-        -- Simulate sensor output at 40 kHz for some time
-        wait for 100 ms;  -- Wait for some time before starting the output
+        wait for 100 ms;
 
-        -- Generate 40 kHz signal for sensor_out
-        for i in 0 to 50 loop  -- Simulate 200 cycles (5 ms total)
+        -- 40 kHz signal
+        for i in 0 to 50 loop
             sensor_out <= '1';
-            wait for 12.5 us;  -- High for 12.5 us (1/2 of 40 kHz period)
+            wait for 12.5 us;
             sensor_out <= '0';
-            wait for 12.5 us;  -- Low for 12.5 us
+            wait for 12.5 us;
         end loop;
     end process;
 
