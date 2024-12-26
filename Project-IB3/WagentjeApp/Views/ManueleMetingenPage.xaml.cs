@@ -1,4 +1,4 @@
-using Microsoft.Maui.Controls;
+//Deze pagina werd niet verder uitgewerkt
 using System.Collections.ObjectModel;
 
 namespace WagentjeApp.Views
@@ -21,7 +21,7 @@ namespace WagentjeApp.Views
             if (!string.IsNullOrWhiteSpace(ManualMeasurementEntry.Text))
             {
                 manualMeasurements.Add(ManualMeasurementEntry.Text);
-                ManualMeasurementEntry.Text = string.Empty; // Clear entry
+                ManualMeasurementEntry.Text = string.Empty; 
             }
             else
             {

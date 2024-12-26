@@ -1,61 +1,61 @@
-﻿using Microsoft.Maui.Controls;
-using WagentjeApp.Views; // Zorg ervoor dat je deze hebt toegevoegd
-using WagentjeApp.Services;
-using System.Threading.Tasks;
+﻿using WagentjeApp.Views; // Voor toegang tot de weergaveklassen zoals LoginPage
+using WagentjeApp.Services; // Voor toegang tot de serviceklassen zoals MqttService
 
 namespace WagentjeApp
 {
     public partial class App : Application
     {
-        private MqttService _mqttService;
+        private MqttService _mqttService; // Instantie van de MQTT-service
 
+        // Constructor voor de App
         public App()
         {
-            InitializeComponent();
+            InitializeComponent(); // Initialiseer de componenten van de applicatie
 
             // Initialiseer de MQTT service en verbind met de broker
-            _mqttService = MqttService.Instance;  // Singleton-instantie gebruiken
+            _mqttService = MqttService.Instance;  // Gebruik de singleton-instantie van de MQTT-service
 
             // Zorg dat de connectie in de achtergrond wordt gemaakt
             InitializeMqttConnection();
 
-            // Set the initial page to LoginPage
+            // Stel de initiële pagina in op LoginPage
             MainPage = new NavigationPage(new LoginPage());
         }
 
+        // Asynchrone methode om de MQTT-verbinding te initialiseren
         private async Task InitializeMqttConnection()
         {
             try
             {
                 // Verbind met de MQTT-broker
                 await _mqttService.ConnectAsync();
-                Console.WriteLine("MQTT connection initialized.");
+                Console.WriteLine("MQTT connection initialized."); // Log een succesbericht
             }
             catch (Exception ex)
             {
+                // Log een foutmelding als de verbinding mislukt
                 Console.WriteLine($"Failed to initialize MQTT connection: {ex.Message}");
             }
         }
 
-        // Eventueel kun je ook bij het hervatten van de app opnieuw de verbinding maken
+        // Methode die wordt aangeroepen wanneer de app wordt gestart
         protected override void OnStart()
         {
-            base.OnStart();
-            // Verbind eventueel opnieuw bij start (afhankelijk van je requirements)
+            base.OnStart(); // Roep de basisimplementatie aan
             InitializeMqttConnection();
         }
 
+        // Methode die wordt aangeroepen wanneer de app in de achtergrond gaat
         protected override void OnSleep()
         {
-            base.OnSleep();
-            // Hier kun je de connectie afsluiten als dat nodig is
-            // (afhankelijk van hoe lang de app in de achtergrond blijft)
+            base.OnSleep(); // Roep de basisimplementatie aan
         }
 
+        // Methode die wordt aangeroepen wanneer de app weer naar voren komt
         protected override void OnResume()
         {
-            base.OnResume();
-            // Verbinding herstellen als de app weer naar voren komt
+            base.OnResume(); // Roep de basisimplementatie aan
+            // Herstel de verbinding als de app weer naar voren komt
             InitializeMqttConnection();
         }
     }
