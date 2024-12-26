@@ -18,9 +18,9 @@ def decrypt(cipher_text):
 
 # Example Usage
 if __name__ == "__main__":
-    message = "balshfglhsdfjlgjksldfhgjkdshgkjsdhfgjshdfjksdfghjklmlkjhgfdfghjklmlkjhgfdsdfghjklqsdfqsdqsdfqsdfqsdfqsdfqsdfqmqmlsdkhfjsgdqlfhjkqsdghflkjsqfdqfqsdfqsdfqsdfqdflhsdkjlfhgjkghklshll"
+    message = "TestSecretstring"
     encrypted_message = encrypt(message)
     print("Encrypted:", encrypted_message)
     # decrypted_message = decrypt(encrypted_message)
-    decrypted_message = decrypt(input("zeg ke"))
+    decrypted_message = decrypt(input("Input: "))
     print("Decrypted:", decrypted_message)

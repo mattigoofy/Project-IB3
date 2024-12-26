@@ -1,25 +1,21 @@
-import mariadb
-import sys
+import mysql.connector
 
-try:
-    conn = mariadb.connect(
-        user="wachentje_user",
-        password="jeSterkeWachtwoord",
-        # host="192.0.2.1",
-        # port=3306,
-        # database="employees"
+# MariaDB-instellingen
+DB_HOST = "localhost"
+DB_USER = "wagentje_user"
+DB_PASSWORD = "robot"
+DB_NAME = "wagentje_db"
 
-    )
-except mariadb.Error as e:
-    print(f"Error connecting to MariaDB Platform: {e}")
-    sys.exit(1)
-
-cur = conn.cursor()
-
-
-def insertSensorData(value, time):
-    cur.execute("INSERT INTO sensordata (value, time) VALUES", value, time)
-
-def insertInlogData(username, password):
-    cur.execute("INSERT INTO inlogdata (username, password) VALUES (?,?)", username, password)
-    
+# Verbinding maken met MariaDB
+def connect_to_db():
+    try:
+        connection = mysql.connector.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME
+        )
+        return connection
+    except mysql.connector.Error as err:
+        print(f"Fout bij het verbinden met de database: {err}")
+        return None
